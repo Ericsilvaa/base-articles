@@ -1,0 +1,51 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+
+model Users {
+  id       String   @id @default(auto()) @map("_id") @db.ObjectId
+  email    String   @unique
+  name     String
+  password String
+  articles  Articles[]
+
+  @@map("users")
+
+}
+
+model Categories {
+  id    String @id @default(auto()) @map("_id") @db.ObjectId
+  name  String
+  parentId   String?   @map("parent_id") @db.ObjectId  // Campo opcional que armazena o ID da categoria pai
+  parent   Categories? @relation("Subcategories", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  children Categories[] @relation("Subcategories")  // Relacionamento com as subcategorias
+  articles   Articles[] // Relacionamento com os artigos
+
+  @@map("categories")
+}
+
+model Articles {
+  id          String @id @default(auto()) @map("_id") @db.ObjectId
+  name       String
+  description     String
+  imageUrl   String
+  content    Bytes[]
+  category    Categories @relation(fields: [categoryId], references: [id])
+    categoryId  String @db.ObjectId
+  author    Users     @relation(fields: [authorId], references: [id])
+    authorId  String @db.ObjectId
+
+  @@map("articles")
+  }

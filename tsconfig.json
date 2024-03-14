@@ -1,0 +1,33 @@
+{
+  "compilerOptions": {
+    "target": "es2017",
+    "module": "commonjs",
+    "lib": ["es6"],
+    "allowJs": true,
+    "outDir": "./dist",
+    "rootDir": "./app",
+    "removeComments": true,
+    "typeRoots": ["./node_modules/@types", "./app/@types"],
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "baseUrl": ".",
+    "sourceMap": true,
+    "allowSyntheticDefaultImports": true,
+    "paths": {
+      "@controllers/*": ["./app/api/controllers/*"],
+      "@services/*": ["./app/api/services/*"],
+      "@repositories/*": ["./app/api/repositories/*"],
+      "@models/*": ["./app/api/models/*"],
+      "@routes/*": ["./app/api/routes/*"],
+      "@utils/*": ["./app/api/utils/*"],
+      "@config/*": ["./app/config/*"],
+      "@database/*": ["./app/database/*"]
+    }
+  },
+  "exclude": ["node_modules"],
+  "include": ["app/**/*.ts"]
+}

@@ -1,0 +1,18 @@
+import { Router } from 'express'
+import users from './users.routes'
+import articles from './articles.routes'
+import categories from './categories.routes'
+import status from './status.routes'
+
+const router = Router()
+
+router.get('/', (req, res) => {
+  res.send('This is the root route!')
+})
+
+router.use('/users', users)
+router.use('/categories', categories)
+router.use('/articles', articles)
+router.use('/', status)
+
+export default router
