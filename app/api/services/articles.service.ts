@@ -1,13 +1,9 @@
-import ArticlesRepository from '@repositories/articles.repository'
+import CategoriesRepository from '../../repository/categories'
 import { StatusProps } from '@utils/apiReturn'
 
 export default class ArticlesService {
-  protected articlesRepository: ArticlesRepository
+  protected articlesRepository = CategoriesRepository
   protected limit = 10
-
-  constructor() {
-    this.articlesRepository = new ArticlesRepository()
-  }
 
   async createArticles(data: any): Promise<StatusProps> {
     try {
@@ -22,7 +18,7 @@ export default class ArticlesService {
           message: 'categoria já cadastrada, Por favor escolha outro email!',
         }
 
-      await this.articlesRepository.save(data)
+      await this.articlesRepository.create(data)
       return {
         code: 201,
         status: true,

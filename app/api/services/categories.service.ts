@@ -1,29 +1,25 @@
 import { Categories } from '@prisma/client'
-import CategoriesRepository from '@repositories/categories.repository'
+import CategoriesRepository from '../../repository/categories'
 import { StatusProps } from '@utils/apiReturn'
 
 export default class CategoriesService {
-  protected categoryRepository: CategoriesRepository
-
-  constructor() {
-    this.categoryRepository = new CategoriesRepository()
-  }
+  protected categoryRepository = CategoriesRepository
 
   async createCategory(data: any): Promise<StatusProps> {
     // se eu tiver um id no data, estou pegando pelos parametros, quero atualizar, se não, estou querendo criar
     try {
-      const categoryExist = await this.categoryRepository.findUnique({
+      const categoryExist = await this.categoryRepository.findOne({
         name: data.name,
       })
 
       if (categoryExist)
         return {
-          code: 404,
+          code: 401,
           status: false,
           message: 'categoria já cadastrada, Por favor escolha outro email!',
         }
 
-      await this.categoryRepository.saveUser(data)
+      await this.categoryRepository.create(data)
       return {
         code: 201,
         status: true,
@@ -42,7 +38,7 @@ export default class CategoriesService {
 
   async removeCategory(data: any): Promise<StatusProps> {
     try {
-      const subCategory = await this.categoryRepository.findById({
+      const subCategory = await this.categoryRepository.findOne({
         parentId: data.id,
       })
 
@@ -84,10 +80,10 @@ export default class CategoriesService {
     }
   }
 
-  getCategories = async () => {
-    const categories = await this.categoryRepository.findAll()
+  async getCategories() {
+    const { rows } = await this.categoryRepository.findAll({})
 
-    if (!categories.length)
+    if (!rows.length)
       return {
         code: 404,
         status: false,
@@ -98,12 +94,12 @@ export default class CategoriesService {
       code: 200,
       status: true,
       message: '',
-      data: this.witPathCategory(categories),
+      data: this.witPathCategory(rows),
     }
   }
 
   getCategoryById = async (id: string) => {
-    const category = await this.categoryRepository.findById({ id })
+    const category = await this.categoryRepository.findOne({ id })
 
     if (!category)
       return {
@@ -121,9 +117,9 @@ export default class CategoriesService {
   }
 
   getTreeCategories = async () => {
-    const categories = await this.categoryRepository.findAll()
+    const { rows } = await this.categoryRepository.findAll({})
 
-    if (!categories.length)
+    if (!rows.length)
       return {
         code: 404,
         status: false,
@@ -134,7 +130,7 @@ export default class CategoriesService {
       code: 200,
       status: true,
       message: '',
-      data: await this.categoryTree(this.witPathCategory(categories), null),
+      data: await this.categoryTree(this.witPathCategory(rows), null),
     }
   }
 

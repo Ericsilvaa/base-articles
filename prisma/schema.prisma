@@ -13,6 +13,16 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// prisma repo generator
+generator repo {
+  provider = "prisma-repo"
+  output   = "../app/repository"
+  query    = true
+  warn     = true
+  info     = true
+  error    = true
+}
+
 
 model Users {
   id       String   @id @default(auto()) @map("_id") @db.ObjectId

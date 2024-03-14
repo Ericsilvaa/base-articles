@@ -5,6 +5,6 @@ import BaseRepository from './base.repository'
 
 export default class CategoriesRepository extends BaseRepository<Categories> {
   constructor() {
-    super('categories')
+    super(prisma.categories)
   }
 }

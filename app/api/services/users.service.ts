@@ -1,4 +1,4 @@
-import UsersRepository from '@repositories/users.repository'
+import UsersRepository from '../../repository/users'
 import { StatusProps } from '@utils/apiReturn'
 import bcrypt from 'bcrypt'
 
@@ -11,11 +11,7 @@ export interface IUser {
 }
 
 export default class UsersService {
-  protected userRepository: UsersRepository
-
-  constructor() {
-    this.userRepository = new UsersRepository()
-  }
+  protected userRepository = UsersRepository
 
   async createUser(data: IUser): Promise<StatusProps> {
     // se eu tiver um id no data, estou pegando pelos parametros, quero atualizar, se não, estou querendo criar
@@ -36,7 +32,7 @@ export default class UsersService {
         password: this.encryptPassword(data.password),
       }
 
-      await this.userRepository.save(data)
+      await this.userRepository.create(data)
       return {
         code: 201,
         status: true,
