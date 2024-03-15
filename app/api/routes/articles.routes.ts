@@ -3,20 +3,16 @@ import articlesController from '@controllers/articles/index'
 
 const router = Router()
 
-router.get(
-  '/articles/:id',
-  articlesController.createUser.bind(articlesController)
-)
+router.get('/:id', articlesController.getArticlesById.bind(articlesController))
 router.delete(
-  '/articles/:id',
-  articlesController.createUser.bind(articlesController)
+  '/delete/:id',
+  articlesController.deleteArticle.bind(articlesController)
 )
-router.get(
-  '/articles/tree',
-  articlesController.createUser.bind(articlesController)
+router.get('/', articlesController.getAllArticles.bind(articlesController))
+router.post('/', articlesController.createArticle.bind(articlesController))
+router.put(
+  '/update/:id',
+  articlesController.updateArticle.bind(articlesController)
 )
-router.get('/articles', articlesController.createUser.bind(articlesController))
-router.post('/articles', articlesController.createUser.bind(articlesController))
-// Adicione outras rotas de usuários conforme necessário
 
 export default router

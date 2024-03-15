@@ -1,4 +1,4 @@
-import UsersRepository from '../../repository/users'
+import UsersRepository from '@repositories/users.repository'
 import { StatusProps } from '@utils/apiReturn'
 import bcrypt from 'bcrypt'
 
@@ -16,7 +16,7 @@ export default class UsersService {
   async createUser(data: IUser): Promise<StatusProps> {
     // se eu tiver um id no data, estou pegando pelos parametros, quero atualizar, se não, estou querendo criar
     try {
-      const emailExists = await this.userRepository.findUnique({
+      const emailExists = await this.userRepository.create({
         email: data.email,
       })
 

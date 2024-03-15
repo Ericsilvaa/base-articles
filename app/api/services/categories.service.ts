@@ -1,5 +1,5 @@
 import { Categories } from '@prisma/client'
-import CategoriesRepository from '../../repository/categories'
+import CategoriesRepository from '@repositories/categories.repository'
 import { StatusProps } from '@utils/apiReturn'
 
 export default class CategoriesService {
@@ -7,7 +7,7 @@ export default class CategoriesService {
 
   async createCategory(data: Partial<Categories>): Promise<StatusProps> {
     try {
-      const categoryExist = await this.categoryRepository.findOne({
+      const categoryExist = await this.categoryRepository.findUnique({
         name: data.name,
       })
 
@@ -39,7 +39,7 @@ export default class CategoriesService {
 
   async updateCategory(data: Categories): Promise<StatusProps> {
     try {
-      const category = await this.categoryRepository.findOne({
+      const category = await this.categoryRepository.findUnique({
         id: data.id,
       })
 
@@ -73,7 +73,7 @@ export default class CategoriesService {
 
   async removeCategory(id: string): Promise<StatusProps> {
     try {
-      const category = await this.categoryRepository.findOne({
+      const category = await this.categoryRepository.findUnique({
         id,
       })
 
@@ -85,7 +85,7 @@ export default class CategoriesService {
         }
       }
 
-      const articles = await this.categoryRepository.findOne({
+      const articles = await this.categoryRepository.findUnique({
         articles: {
           some: {
             categoryId: id,
@@ -118,9 +118,9 @@ export default class CategoriesService {
   }
 
   async getCategories() {
-    const { rows } = await this.categoryRepository.findAll({})
+    const categories = await this.categoryRepository.findAll({})
 
-    if (!rows.length)
+    if (!categories.length)
       return {
         code: 404,
         status: false,
@@ -131,12 +131,12 @@ export default class CategoriesService {
       code: 200,
       status: true,
       message: '',
-      data: this.witPathCategory(rows),
+      data: this.witPathCategory(categories),
     }
   }
 
   async getCategoryById(id: string) {
-    const category = await this.categoryRepository.findOne({ id })
+    const category = await this.categoryRepository.findUnique({ id })
 
     if (!category)
       return {
@@ -154,13 +154,13 @@ export default class CategoriesService {
   }
 
   async getTreeCategories() {
-    const { rows } = await this.categoryRepository.findAll({})
+    const categories = await this.categoryRepository.findAll({})
 
     return {
       code: 200,
       status: true,
       message: '',
-      // data:
+      data: this.categoryTree(categories, null),
     }
   }
 
