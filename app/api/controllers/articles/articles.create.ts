@@ -8,24 +8,38 @@ export class ArticlesController {
     this.articlesServices = new ArticlesService()
   }
 
-  async createUser(req: Request, res: Response) {
+  async createArticle(req: Request, res: Response) {
     const article = { ...req.body }
-    // estou querendo criar um usuário
     const response = await this.articlesServices.createArticles(article)
 
     return res.status(response.code).json({ ...response })
   }
 
-  // async updateUser(req: Request, res: Response) {
-  //   const user = { ...req.body }
-  //   user.id = req.params.id
+  async getAllArticles(req: Request, res: Response) {
+    const data = req.body
+    const response = await this.articlesServices.getArticles(data)
 
-  // realizar validações aqui
-  // delete user.confirmPassword
+    return res.status(response.code).json({ ...response })
+  }
 
-  // estou querendo atualizar um usuário
-  // const response = await this.userServices.(user)
+  async getArticlesById(req: Request, res: Response) {
+    const response = await this.articlesServices.getArticlesById(req.params.id)
 
-  // return res.status(response.code).json({ ...response })
-  // }
+    return res.status(response.code).json({ ...response })
+  }
+
+  async deleteArticle(req: Request, res: Response) {
+    const response = await this.articlesServices.removeArticles(req.params.id)
+
+    return res.status(response.code).json({ ...response })
+  }
+
+  async updateArticle(req: Request, res: Response) {
+    const article = { ...req.body }
+    article.id = req.params.id
+
+    const response = await this.articlesServices.updateArticles(article)
+
+    return res.status(response.code).json({ ...response })
+  }
 }

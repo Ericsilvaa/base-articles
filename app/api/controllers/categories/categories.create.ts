@@ -1,31 +1,51 @@
-import UsersService from '@services/users.service'
+import CategoryService from '@services/categories.service'
 import { Request, Response } from 'express'
 
 export class CategoriesController {
-  protected userServices: UsersService
+  protected categoryService: CategoryService
 
   constructor() {
-    this.userServices = new UsersService()
+    this.categoryService = new CategoryService()
   }
 
-  async createUser(req: Request, res: Response) {
-    const user = { ...req.body }
-    // estou querendo criar um usuário
-    const response = await this.userServices.createUser(user)
+  async createCategory(req: Request, res: Response) {
+    const category = { ...req.body }
+
+    const response = await this.categoryService.createCategory(category)
 
     return res.status(response.code).json({ ...response })
   }
 
-  // async updateUser(req: Request, res: Response) {
-  //   const user = { ...req.body }
-  //   user.id = req.params.id
+  async getAllCategories(req: Request, res: Response) {
+    const response = await this.categoryService.getCategories()
 
-  // realizar validações aqui
-  // delete user.confirmPassword
+    return res.status(response.code).json({ ...response })
+  }
 
-  // estou querendo atualizar um usuário
-  // const response = await this.userServices.(user)
+  async getCategoryTree(req: Request, res: Response) {
+    const response = await this.categoryService.getTreeCategories()
 
-  // return res.status(response.code).json({ ...response })
-  // }
+    return res.status(response.code).json({ ...response })
+  }
+
+  async getCategoryById(req: Request, res: Response) {
+    const response = await this.categoryService.getCategoryById(req.params.id)
+
+    return res.status(response.code).json({ ...response })
+  }
+
+  async deleteCategory(req: Request, res: Response) {
+    const response = await this.categoryService.removeCategory(req.params.id)
+
+    return res.status(response.code).json({ ...response })
+  }
+
+  async updateCategory(req: Request, res: Response) {
+    const category = { ...req.body }
+    category.id = req.params.id
+
+    const response = await this.categoryService.updateCategory(category)
+
+    return res.status(response.code).json({ ...response })
+  }
 }

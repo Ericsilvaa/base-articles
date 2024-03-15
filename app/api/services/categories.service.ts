@@ -3,14 +3,9 @@ import CategoriesRepository from '@repositories/categories.repository'
 import { StatusProps } from '@utils/apiReturn'
 
 export default class CategoriesService {
-  protected categoryRepository: CategoriesRepository
+  protected categoryRepository = CategoriesRepository
 
-  constructor() {
-    this.categoryRepository = new CategoriesRepository()
-  }
-
-  async createCategory(data: any): Promise<StatusProps> {
-    // se eu tiver um id no data, estou pegando pelos parametros, quero atualizar, se não, estou querendo criar
+  async createCategory(data: Partial<Categories>): Promise<StatusProps> {
     try {
       const categoryExist = await this.categoryRepository.findUnique({
         name: data.name,
@@ -18,12 +13,14 @@ export default class CategoriesService {
 
       if (categoryExist)
         return {
-          code: 404,
+          code: 401,
           status: false,
-          message: 'categoria já cadastrada, Por favor escolha outro email!',
+          message: 'categoria já cadastrada!',
         }
 
-      await this.categoryRepository.saveUser(data)
+      console.log('🚀 ~ CategoriesService ~ createCategory ~ data:', data)
+
+      await this.categoryRepository.create({ name: data.name, ...data })
       return {
         code: 201,
         status: true,
@@ -40,35 +37,71 @@ export default class CategoriesService {
     }
   }
 
-  async removeCategory(data: any): Promise<StatusProps> {
+  async updateCategory(data: Categories): Promise<StatusProps> {
     try {
-      const subCategory = await this.categoryRepository.findById({
-        parentId: data.id,
+      const category = await this.categoryRepository.findUnique({
+        id: data.id,
       })
 
-      if (subCategory) {
+      if (!category) {
         return {
           code: 404,
           status: false,
-          message:
-            'Categoria não pode ser deletado, pois possui subcategorias!',
+          message: 'Categoria não encontrada!',
+        }
+      }
+
+      const { id, ...dataUp } = data
+
+      if (!dataUp.parentId) dataUp.parentId = null
+
+      await this.categoryRepository.update({ id }, { ...dataUp })
+
+      return {
+        code: 200,
+        status: true,
+        message: 'Categoria atualizada com sucesso!',
+      }
+    } catch (err) {
+      return {
+        code: err?.code || 500,
+        status: false,
+        message: err?.message || 'Internal server error',
+      }
+    }
+  }
+
+  async removeCategory(id: string): Promise<StatusProps> {
+    try {
+      const category = await this.categoryRepository.findUnique({
+        id,
+      })
+
+      if (category.parentId) {
+        return {
+          code: 400,
+          status: false,
+          message: 'Categoria não pode ser deletada, pois é subcategoria!',
         }
       }
 
       const articles = await this.categoryRepository.findUnique({
-        categoryId: data.id,
+        articles: {
+          some: {
+            categoryId: id,
+          },
+        },
       })
 
       if (articles) {
         return {
           code: 404,
           status: false,
-          message:
-            'Categoria não pode ser deletado, pois possui subcategorias!',
+          message: 'Categoria não pode ser deleada, pois possui Artigos!',
         }
       }
 
-      await this.categoryRepository.delete({ id: data.id })
+      await this.categoryRepository.delete({ id })
 
       return {
         code: 204,
@@ -84,8 +117,8 @@ export default class CategoriesService {
     }
   }
 
-  getCategories = async () => {
-    const categories = await this.categoryRepository.findAll()
+  async getCategories() {
+    const categories = await this.categoryRepository.findAll({})
 
     if (!categories.length)
       return {
@@ -102,8 +135,8 @@ export default class CategoriesService {
     }
   }
 
-  getCategoryById = async (id: string) => {
-    const category = await this.categoryRepository.findById({ id })
+  async getCategoryById(id: string) {
+    const category = await this.categoryRepository.findUnique({ id })
 
     if (!category)
       return {
@@ -120,21 +153,14 @@ export default class CategoriesService {
     }
   }
 
-  getTreeCategories = async () => {
-    const categories = await this.categoryRepository.findAll()
-
-    if (!categories.length)
-      return {
-        code: 404,
-        status: false,
-        message: 'Nenhuma categoria encontrada',
-      }
+  async getTreeCategories() {
+    const categories = await this.categoryRepository.findAll({})
 
     return {
       code: 200,
       status: true,
       message: '',
-      data: await this.categoryTree(this.witPathCategory(categories), null),
+      data: this.categoryTree(categories, null),
     }
   }
 
@@ -160,15 +186,17 @@ export default class CategoriesService {
   }
 
   // function transform array in structure tree
-  private categoryTree = async (categories: any, tree: any) => {
+  private categoryTree = (categories: Categories[], tree: any) => {
     if (!tree) {
-      tree = categories.filter((c: any) => !c.parentId)
-      tree = tree.map((parent: any) => {
-        const isChild = (node: any) => node.parentId === parent.id
+      tree = categories.filter((c) => !c.parentId)
+      tree = categories.map((parent: Categories & { children: Categories }) => {
+        const isChild = (node: Categories) => node.parentId === parent.id
+
         parent.children = this.categoryTree(
           categories,
           categories.filter(isChild)
         )
+
         return parent
       })
       return tree

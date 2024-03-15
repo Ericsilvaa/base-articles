@@ -17,6 +17,7 @@
     "baseUrl": ".",
     "sourceMap": true,
     "allowSyntheticDefaultImports": true,
+    "ignoreDeprecations": "5.0",
     "paths": {
       "@controllers/*": ["./app/api/controllers/*"],
       "@services/*": ["./app/api/services/*"],
@@ -29,5 +30,5 @@
     }
   },
   "exclude": ["node_modules"],
-  "include": ["app/**/*.ts"]
+  "include": ["app/**/*.ts", "app/repository/prisma-repo.ts"]
 }

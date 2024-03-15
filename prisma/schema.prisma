@@ -40,8 +40,8 @@ model Articles {
   id          String @id @default(auto()) @map("_id") @db.ObjectId
   name       String
   description     String
-  imageUrl   String
-  content    Bytes[]
+  imageUrl   String?
+  content    String
   category    Categories @relation(fields: [categoryId], references: [id])
     categoryId  String @db.ObjectId
   author    Users     @relation(fields: [authorId], references: [id])
