@@ -1,6 +1,10 @@
-import UsersRepository from '@repositories/users.repository'
-import { StatusProps } from '@utils/apiReturn'
+import { Users } from '@prisma/client'
 import bcrypt from 'bcrypt'
+import jwt from 'jwt-simple'
+
+import UsersRepository from '@repositories/users.repository'
+
+import { StatusProps } from '@utils/apiReturn'
 
 export interface IUser {
   id?: string
@@ -16,7 +20,7 @@ export default class UsersService {
   async createUser(data: IUser): Promise<StatusProps> {
     // se eu tiver um id no data, estou pegando pelos parametros, quero atualizar, se não, estou querendo criar
     try {
-      const emailExists = await this.userRepository.create({
+      const emailExists = await this.userRepository.findUnique({
         email: data.email,
       })
 
@@ -45,6 +49,59 @@ export default class UsersService {
         code: err?.code || 500,
         status: false,
         message: err?.message || 'Internal server error',
+      }
+    }
+  }
+
+  async singIn(data: Partial<Users>): Promise<StatusProps> {
+    try {
+      const user = await this.userRepository.findUnique({ email: data.email })
+
+      if (!user) {
+        return {
+          code: 404,
+          status: false,
+          message: 'Usuário não encontrado!',
+        }
+      }
+
+      const isMatch = bcrypt.compareSync(data.password, user.password)
+
+      if (!isMatch) {
+        return {
+          code: 401,
+          status: false,
+          message: 'Email ou Senha inválidos!',
+        }
+      }
+
+      const now = Math.floor(Date.now() / 1000)
+
+      const payload = {
+        id: user.id,
+        email: user.email,
+        iat: now,
+        // exp: now + 60 * 60 * 24,
+        exp: now + 60 * 10,
+      }
+      const key = 'mysecret'
+
+      const token = jwt.encode(payload, key)
+
+      return {
+        code: 200,
+        status: true,
+        message: 'Usuário autenticado com sucesso!',
+        data: {
+          ...payload,
+          token,
+        },
+      }
+    } catch (error) {
+      return {
+        code: error?.code || 500,
+        status: false,
+        message: error?.message || 'Internal server error',
       }
     }
   }

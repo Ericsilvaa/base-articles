@@ -49,3 +49,14 @@ model Articles {
 
   @@map("articles")
   }
+
+model Stats {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  users Int @default(0) // Contador de usuários
+  categories Int @default(0) // Contador de categorias
+  articles Int @default(0) // Contador de artigos
+  createdAt DateTime @default(now()) // Data de criação do registro
+
+
+  @@map("stats")
+}

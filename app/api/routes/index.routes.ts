@@ -1,8 +1,9 @@
 import { Router } from 'express'
+
 import users from './users.routes'
 import articles from './articles.routes'
 import categories from './categories.routes'
-import status from './status.routes'
+import stats from './stats.routes'
 
 const router = Router()
 
@@ -13,6 +14,6 @@ router.get('/', (req, res) => {
 router.use('/users', users)
 router.use('/categories', categories)
 router.use('/articles', articles)
-router.use('/', status)
+router.use('/stats', stats)
 
 export default router
