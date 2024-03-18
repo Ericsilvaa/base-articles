@@ -2,6 +2,7 @@ import { Articles } from '@prisma/client'
 import ArticlesRepository from '@repositories/articles.repository'
 import { StatusProps } from '@utils/apiReturn'
 
+type ArticlesLimits = 10 | 20 | 50
 export default class ArticlesService {
   protected articlesRepository = ArticlesRepository
   protected limit = 2
@@ -25,22 +26,18 @@ export default class ArticlesService {
     }
   }
 
-  async getArticles(data: { page: number }) {
+  async getArticles(data: { page?: number; limit?: ArticlesLimits }) {
     const page = data.page || 1
-    const offset = page * this.limit - this.limit
+    const limit = +data.limit || this.limit
+    const offset = page * limit - limit
 
     try {
-      // const { rows, count } = await this.articlesRepository.findMany(
-      //   {},
-      //   { skip: offset, take: this.limit }
-      // )
-
-      const categories = await this.articlesRepository.findMany(
+      const articles = await this.articlesRepository.findMany(
         {},
-        { skip: offset, take: this.limit }
+        { skip: offset, take: limit }
       )
 
-      if (!categories.length)
+      if (!articles.length)
         return {
           code: 404,
           status: false,
@@ -51,7 +48,7 @@ export default class ArticlesService {
         code: 200,
         status: true,
         message: '',
-        data: { categories, limit: this.limit, page },
+        data: { articles, limit: this.limit, page, count: articles.length },
       }
     } catch (err) {
       return {
@@ -139,8 +136,9 @@ export default class ArticlesService {
   }
 
   // getArticleByCategory = async (data: any) => {
-  //   const categoryId = data.categoryId
-  //   const page = data.page || 1
+  // const page = data.page || 1
+  // const limit = data.limit || this.limit
+  // const offset = page * limit - limit
   //   // const categories = await this.categoryRepository.findAll()
   //   // const ids = categories.map(c => c.id)
 

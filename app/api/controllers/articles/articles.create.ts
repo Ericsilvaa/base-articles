@@ -16,8 +16,9 @@ export class ArticlesController {
   }
 
   async getAllArticles(req: Request, res: Response) {
-    const data = req.body
-    const response = await this.articlesServices.getArticles(data)
+    const query = req.query
+
+    const response = await this.articlesServices.getArticles(query)
 
     return res.status(response.code).json({ ...response })
   }
