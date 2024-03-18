@@ -11,6 +11,12 @@ export class CategoriesController {
   async createCategory(req: Request, res: Response) {
     const category = { ...req.body }
 
+    if (category.id) {
+      return res.status(400).json({
+        message: 'Não é possível criar uma categoria com um id específico',
+      })
+    }
+
     const response = await this.categoryService.createCategory(category)
 
     return res.status(response.code).json({ ...response })

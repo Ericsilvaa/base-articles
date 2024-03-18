@@ -11,11 +11,19 @@ export class ArticlesRepository {
     return await prisma.articles.create({ data })
   }
 
-  async findAll() {
-    return await prisma.articles.findMany({})
+  async findAll(options: any) {
+    return await prisma.articles.findMany({ where: {}, ...options })
   }
 
-  async findMany(where: any, options: any) {
+  async findMany(where: any = {}, select: any = {}, options: any = {}) {
+    return await prisma.articles.findMany({
+      select: { ...select },
+      ...options,
+      where: { ...where },
+    })
+  }
+
+  async findManyWithWhere(where: any, options?: any) {
     return await prisma.articles.findMany({
       where: { ...where },
       ...options,

@@ -7,24 +7,11 @@ export default class CategoriesService {
 
   async createCategory(data: Partial<Categories>): Promise<StatusProps> {
     try {
-      const categoryExist = await this.categoryRepository.findUnique({
-        name: data.name,
-      })
-
-      if (categoryExist)
-        return {
-          code: 401,
-          status: false,
-          message: 'categoria já cadastrada!',
-        }
-
-      console.log('🚀 ~ CategoriesService ~ createCategory ~ data:', data)
-
-      await this.categoryRepository.create({ name: data.name, ...data })
+      await this.categoryRepository.create(data)
       return {
         code: 201,
         status: true,
-        message: 'Usuário criado com sucesso!',
+        message: 'Categoria criado com sucesso!',
       }
     } catch (err) {
       console.log(err)
@@ -118,7 +105,7 @@ export default class CategoriesService {
   }
 
   async getCategories() {
-    const categories = await this.categoryRepository.findAll({})
+    const categories = await this.categoryRepository.findAll()
 
     if (!categories.length)
       return {
@@ -154,7 +141,7 @@ export default class CategoriesService {
   }
 
   async getTreeCategories() {
-    const categories = await this.categoryRepository.findAll({})
+    const categories = await this.categoryRepository.findAll()
 
     return {
       code: 200,
@@ -187,19 +174,15 @@ export default class CategoriesService {
 
   // function transform array in structure tree
   private categoryTree = (categories: Categories[], tree: any) => {
-    if (!tree) {
-      tree = categories.filter((c) => !c.parentId)
-      tree = categories.map((parent: Categories & { children: Categories }) => {
-        const isChild = (node: Categories) => node.parentId === parent.id
-
-        parent.children = this.categoryTree(
-          categories,
-          categories.filter(isChild)
-        )
-
-        return parent
-      })
-      return tree
-    }
+    if (!tree) tree = categories.filter((c) => !c.parentId)
+    tree = tree.map((parentNode: any) => {
+      const isChild = (node: Categories) => node.parentId == parentNode.id
+      parentNode.children = this.categoryTree(
+        categories,
+        categories.filter(isChild)
+      )
+      return parentNode
+    })
+    return tree
   }
 }

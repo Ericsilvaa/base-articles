@@ -1,10 +1,20 @@
 import { Articles } from '@prisma/client'
-import ArticlesRepository from '@repositories/articles.repository'
 import { StatusProps } from '@utils/apiReturn'
 
+import ArticlesRepository from '@repositories/articles.repository'
+import CategoryRepository from '@repositories/categories.repository'
+
+type ArticlesLimits = 2 | 5 | 10 | 20 | 50
+
+type ArticlesDataProps = {
+  id?: string
+  page?: number
+  limit?: ArticlesLimits
+}
 export default class ArticlesService {
-  protected articlesRepository = ArticlesRepository
   protected limit = 2
+  protected articlesRepository = ArticlesRepository
+  protected categoryRepository = CategoryRepository
 
   async createArticles(data: Partial<Articles>): Promise<StatusProps> {
     try {
@@ -25,22 +35,18 @@ export default class ArticlesService {
     }
   }
 
-  async getArticles(data: { page: number }) {
+  async getArticles(data: ArticlesDataProps) {
     const page = data.page || 1
-    const offset = page * this.limit - this.limit
+    const limit = +data.limit || this.limit
+    const offset = page * limit - limit
 
     try {
-      // const { rows, count } = await this.articlesRepository.findMany(
-      //   {},
-      //   { skip: offset, take: this.limit }
-      // )
+      const articles = await this.articlesRepository.findAll({
+        skip: offset,
+        take: limit,
+      })
 
-      const categories = await this.articlesRepository.findMany(
-        {},
-        { skip: offset, take: this.limit }
-      )
-
-      if (!categories.length)
+      if (!articles.length)
         return {
           code: 404,
           status: false,
@@ -51,7 +57,7 @@ export default class ArticlesService {
         code: 200,
         status: true,
         message: '',
-        data: { categories, limit: this.limit, page },
+        data: { articles, limit: this.limit, page, count: articles.length },
       }
     } catch (err) {
       return {
@@ -138,35 +144,99 @@ export default class ArticlesService {
     }
   }
 
-  // getArticleByCategory = async (data: any) => {
-  //   const categoryId = data.categoryId
-  //   const page = data.page || 1
-  //   // const categories = await this.categoryRepository.findAll()
-  //   // const ids = categories.map(c => c.id)
+  async getArticleByCategory(data: ArticlesDataProps) {
+    const page = data.page || 1
+    const limit = +data.limit || this.limit
+    const offset = page * limit - limit
 
-  //   try {
-  //     // consulta deve ser feita em duas tabelas: articles e users
-  //     // colocar limit e offset
-  //   } catch (error) {
-  //     return {
-  //       code: error?.code || 500,
-  //       status: false,
-  //       message: error?.message || 'Internal server error',
-  //     }
-  //   }
+    try {
+      const categories = await this.fetchCategoriesWithChildren(data.id)
 
-  //   if (!categories.length)
-  //     return {
-  //       code: 404,
-  //       status: false,
-  //       message: 'Nenhuma categoria encontrada',
-  //     }
+      if (!Array.isArray(categories)) {
+        return categories
+      } else if (!categories.length) {
+        return {
+          code: 404,
+          status: false,
+          message: 'Nenhuma categoria encontrada',
+        }
+      }
 
-  //   return {
-  //     code: 200,
-  //     status: true,
-  //     message: '',
-  //     data: await this.categoryTree(this.witPathCategory(categories), null),
-  //   }
-  // }
+      const ids: string[] = categories.map((c) => c.id)
+
+      const articles = await this.fetchArticlesWithUsers(ids, offset, limit)
+
+      if (!Array.isArray(articles)) {
+        return articles
+      } else if (!articles.length) {
+        return {
+          code: 404,
+          status: false,
+          message: 'Nenhum artigo encontrado',
+        }
+      }
+
+      return {
+        code: 200,
+        status: true,
+        message: '',
+        data: { articles, limit: this.limit, page, count: articles.length },
+      }
+    } catch (error) {
+      return {
+        code: error?.code || 500,
+        status: false,
+        message: error?.message || 'Internal server error',
+      }
+    }
+  }
+
+  private async fetchArticlesWithUsers(
+    ids: string[],
+    offset: number,
+    limit: number
+  ) {
+    try {
+      const articlesWithUsers = await this.articlesRepository.findMany(
+        { categoryId: { in: ids } },
+        {
+          id: true,
+          name: true,
+          description: true,
+          imageUrl: true,
+          author: { select: { name: true } },
+        },
+        { take: limit, skip: offset, orderBy: { id: 'desc' } }
+      )
+
+      return articlesWithUsers
+    } catch (error) {
+      return {
+        code: error?.code || 500,
+        status: false,
+        message: error?.message || 'Internal server error',
+      }
+    }
+  }
+
+  private async fetchCategoriesWithChildren(id: string) {
+    try {
+      // Buscar a categoria principal pelo ID
+      const mainCategory = await this.categoryRepository.findUnique({ id })
+
+      // Buscar as subcategorias com base no ID da categoria principal
+      const subcategories = await this.categoryRepository.findManyWithWhere({
+        parentId: id,
+      })
+
+      // Combina a categoria principal com as subcategorias
+      return [mainCategory, ...subcategories]
+    } catch (error) {
+      return {
+        code: error?.code || 500,
+        status: false,
+        message: error?.message || 'Internal server error',
+      }
+    }
+  }
 }

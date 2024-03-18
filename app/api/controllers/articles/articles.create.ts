@@ -16,8 +16,9 @@ export class ArticlesController {
   }
 
   async getAllArticles(req: Request, res: Response) {
-    const data = req.body
-    const response = await this.articlesServices.getArticles(data)
+    const query = req.query
+
+    const response = await this.articlesServices.getArticles(query)
 
     return res.status(response.code).json({ ...response })
   }
@@ -39,6 +40,18 @@ export class ArticlesController {
     article.id = req.params.id
 
     const response = await this.articlesServices.updateArticles(article)
+
+    return res.status(response.code).json({ ...response })
+  }
+
+  async getArticlesByCategory(req: Request, res: Response) {
+    const { category_id: id } = req.params
+    const query = req.query
+
+    const response = await this.articlesServices.getArticleByCategory({
+      id,
+      ...query,
+    })
 
     return res.status(response.code).json({ ...response })
   }

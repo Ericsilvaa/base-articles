@@ -11,12 +11,20 @@ class UsersRepository {
     return await prisma.users.create({ data })
   }
 
-  async findAll(where: any) {
-    return await prisma.users.findMany({ where: { ...where } })
+  async findAll() {
+    return await prisma.users.findMany({})
   }
 
-  async findMany(where: any, options: any) {
-    return await prisma.articles.findMany({
+  async findMany(where: any = {}, select: any = {}, options: any = {}) {
+    return await prisma.users.findMany({
+      select: { ...select },
+      ...options,
+      where: { ...where },
+    })
+  }
+
+  async findManyWithWhere(where: any, options?: any) {
+    return await prisma.users.findMany({
       where: { ...where },
       ...options,
     })
