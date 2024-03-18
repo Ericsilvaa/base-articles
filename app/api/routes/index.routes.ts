@@ -1,4 +1,5 @@
 import { Router } from 'express'
+
 import users from './users.routes'
 import articles from './articles.routes'
 import categories from './categories.routes'

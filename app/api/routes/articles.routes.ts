@@ -16,7 +16,10 @@ router.put(
   '/update/:id',
   articlesController.updateArticle.bind(articlesController)
 )
-router.get('/', articlesController.getAllArticles.bind(articlesController))
-router.post('/', articlesController.createArticle.bind(articlesController))
+
+router
+  .route('/')
+  .get(articlesController.getAllArticles.bind(articlesController))
+  .post(articlesController.createArticle.bind(articlesController))
 
 export default router
