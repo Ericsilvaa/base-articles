@@ -15,7 +15,15 @@ class CategoriesRepository {
     return await prisma.categories.findMany({})
   }
 
-  async findMany(where: any, options: any) {
+  async findMany(where: any = {}, select: any = {}, options: any = {}) {
+    return await prisma.categories.findMany({
+      select: { ...select },
+      ...options,
+      where: { ...where },
+    })
+  }
+
+  async findManyWithWhere(where: any, options?: any) {
     return await prisma.categories.findMany({
       where: { ...where },
       ...options,

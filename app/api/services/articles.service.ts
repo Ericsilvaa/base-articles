@@ -1,4 +1,4 @@
-import { Articles, PrismaClient } from '@prisma/client'
+import { Articles } from '@prisma/client'
 import { StatusProps } from '@utils/apiReturn'
 
 import ArticlesRepository from '@repositories/articles.repository'
@@ -11,7 +11,6 @@ type ArticlesDataProps = {
   page?: number
   limit?: ArticlesLimits
 }
-const prisma = new PrismaClient()
 export default class ArticlesService {
   protected limit = 2
   protected articlesRepository = ArticlesRepository
@@ -42,10 +41,10 @@ export default class ArticlesService {
     const offset = page * limit - limit
 
     try {
-      const articles = await this.articlesRepository.findMany(
-        {},
-        { skip: offset, take: limit }
-      )
+      const articles = await this.articlesRepository.findAll({
+        skip: offset,
+        take: limit,
+      })
 
       if (!articles.length)
         return {
@@ -153,23 +152,29 @@ export default class ArticlesService {
     try {
       const categories = await this.fetchCategoriesWithChildren(data.id)
 
-      if (!categories.length)
+      if (!Array.isArray(categories)) {
+        return categories
+      } else if (!categories.length) {
         return {
           code: 404,
           status: false,
           message: 'Nenhuma categoria encontrada',
         }
+      }
 
       const ids: string[] = categories.map((c) => c.id)
 
       const articles = await this.fetchArticlesWithUsers(ids, offset, limit)
 
-      if (!articles.length)
+      if (!Array.isArray(articles)) {
+        return articles
+      } else if (!articles.length) {
         return {
           code: 404,
           status: false,
           message: 'Nenhum artigo encontrado',
         }
+      }
 
       return {
         code: 200,
@@ -192,24 +197,25 @@ export default class ArticlesService {
     limit: number
   ) {
     try {
-      const articlesWithUsers = await prisma.articles.findMany({
-        select: {
+      const articlesWithUsers = await this.articlesRepository.findMany(
+        { categoryId: { in: ids } },
+        {
           id: true,
           name: true,
           description: true,
           imageUrl: true,
           author: { select: { name: true } },
         },
-        take: limit,
-        skip: offset,
-        where: { categoryId: { in: ids } },
-        orderBy: { id: 'desc' },
-      })
+        { take: limit, skip: offset, orderBy: { id: 'desc' } }
+      )
 
       return articlesWithUsers
     } catch (error) {
-      console.error('Error fetching articles with users:', error)
-      throw error
+      return {
+        code: error?.code || 500,
+        status: false,
+        message: error?.message || 'Internal server error',
+      }
     }
   }
 
@@ -219,20 +225,18 @@ export default class ArticlesService {
       const mainCategory = await this.categoryRepository.findUnique({ id })
 
       // Buscar as subcategorias com base no ID da categoria principal
-      const subcategories = await this.categoryRepository.findMany(
-        {
-          parentId: id,
-        },
-        {}
-      )
+      const subcategories = await this.categoryRepository.findManyWithWhere({
+        parentId: id,
+      })
 
       // Combina a categoria principal com as subcategorias
-      const categoriesWithChildren = [mainCategory, ...subcategories]
-
-      return categoriesWithChildren
+      return [mainCategory, ...subcategories]
     } catch (error) {
-      console.error('Error fetching categories with children:', error)
-      throw error
+      return {
+        code: error?.code || 500,
+        status: false,
+        message: error?.message || 'Internal server error',
+      }
     }
   }
 }
