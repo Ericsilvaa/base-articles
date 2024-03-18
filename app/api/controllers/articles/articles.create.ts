@@ -43,4 +43,16 @@ export class ArticlesController {
 
     return res.status(response.code).json({ ...response })
   }
+
+  async getArticlesByCategory(req: Request, res: Response) {
+    const { category_id: id } = req.params
+    const query = req.query
+
+    const response = await this.articlesServices.getArticleByCategory({
+      id,
+      ...query,
+    })
+
+    return res.status(response.code).json({ ...response })
+  }
 }

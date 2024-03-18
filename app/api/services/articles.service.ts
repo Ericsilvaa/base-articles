@@ -1,11 +1,21 @@
-import { Articles } from '@prisma/client'
-import ArticlesRepository from '@repositories/articles.repository'
+import { Articles, PrismaClient } from '@prisma/client'
 import { StatusProps } from '@utils/apiReturn'
 
-type ArticlesLimits = 10 | 20 | 50
+import ArticlesRepository from '@repositories/articles.repository'
+import CategoryRepository from '@repositories/categories.repository'
+
+type ArticlesLimits = 2 | 5 | 10 | 20 | 50
+
+type ArticlesDataProps = {
+  id?: string
+  page?: number
+  limit?: ArticlesLimits
+}
+const prisma = new PrismaClient()
 export default class ArticlesService {
-  protected articlesRepository = ArticlesRepository
   protected limit = 2
+  protected articlesRepository = ArticlesRepository
+  protected categoryRepository = CategoryRepository
 
   async createArticles(data: Partial<Articles>): Promise<StatusProps> {
     try {
@@ -26,7 +36,7 @@ export default class ArticlesService {
     }
   }
 
-  async getArticles(data: { page?: number; limit?: ArticlesLimits }) {
+  async getArticles(data: ArticlesDataProps) {
     const page = data.page || 1
     const limit = +data.limit || this.limit
     const offset = page * limit - limit
@@ -135,36 +145,94 @@ export default class ArticlesService {
     }
   }
 
-  // getArticleByCategory = async (data: any) => {
-  // const page = data.page || 1
-  // const limit = data.limit || this.limit
-  // const offset = page * limit - limit
-  //   // const categories = await this.categoryRepository.findAll()
-  //   // const ids = categories.map(c => c.id)
+  async getArticleByCategory(data: ArticlesDataProps) {
+    const page = data.page || 1
+    const limit = +data.limit || this.limit
+    const offset = page * limit - limit
 
-  //   try {
-  //     // consulta deve ser feita em duas tabelas: articles e users
-  //     // colocar limit e offset
-  //   } catch (error) {
-  //     return {
-  //       code: error?.code || 500,
-  //       status: false,
-  //       message: error?.message || 'Internal server error',
-  //     }
-  //   }
+    try {
+      const categories = await this.fetchCategoriesWithChildren(data.id)
 
-  //   if (!categories.length)
-  //     return {
-  //       code: 404,
-  //       status: false,
-  //       message: 'Nenhuma categoria encontrada',
-  //     }
+      if (!categories.length)
+        return {
+          code: 404,
+          status: false,
+          message: 'Nenhuma categoria encontrada',
+        }
 
-  //   return {
-  //     code: 200,
-  //     status: true,
-  //     message: '',
-  //     data: await this.categoryTree(this.witPathCategory(categories), null),
-  //   }
-  // }
+      const ids: string[] = categories.map((c) => c.id)
+
+      const articles = await this.fetchArticlesWithUsers(ids, offset, limit)
+
+      if (!articles.length)
+        return {
+          code: 404,
+          status: false,
+          message: 'Nenhum artigo encontrado',
+        }
+
+      return {
+        code: 200,
+        status: true,
+        message: '',
+        data: { articles, limit: this.limit, page, count: articles.length },
+      }
+    } catch (error) {
+      return {
+        code: error?.code || 500,
+        status: false,
+        message: error?.message || 'Internal server error',
+      }
+    }
+  }
+
+  private async fetchArticlesWithUsers(
+    ids: string[],
+    offset: number,
+    limit: number
+  ) {
+    try {
+      const articlesWithUsers = await prisma.articles.findMany({
+        select: {
+          id: true,
+          name: true,
+          description: true,
+          imageUrl: true,
+          author: { select: { name: true } },
+        },
+        take: limit,
+        skip: offset,
+        where: { categoryId: { in: ids } },
+        orderBy: { id: 'desc' },
+      })
+
+      return articlesWithUsers
+    } catch (error) {
+      console.error('Error fetching articles with users:', error)
+      throw error
+    }
+  }
+
+  private async fetchCategoriesWithChildren(id: string) {
+    try {
+      // Buscar a categoria principal pelo ID
+      const mainCategory = await this.categoryRepository.findUnique({ id })
+
+      // Buscar as subcategorias com base no ID da categoria principal
+      const subcategories = await this.categoryRepository.findMany(
+        {
+          parentId: id,
+        },
+        {}
+      )
+
+      // Combina a categoria principal com as subcategorias
+      const categoriesWithChildren = [mainCategory, ...subcategories]
+
+      return categoriesWithChildren
+    } catch (error) {
+      console.error('Error fetching categories with children:', error)
+      throw error
+    }
+  }
 }
