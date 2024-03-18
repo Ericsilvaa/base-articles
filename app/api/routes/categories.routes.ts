@@ -1,7 +1,10 @@
 import { Router } from 'express'
 import categoriesController from '@controllers/categories/index'
+// import AuthPassport from '../middlewares/passport'
 
 const router = Router()
+
+// router.all('/', AuthPassport.authJwt().authenticate())
 
 router.get(
   '/tree',
