@@ -5,6 +5,10 @@ import ArticlesRepository from '@repositories/articles.repository'
 import CategoryRepository from '@repositories/categories.repository'
 import { prisma } from '@database/index'
 
+type FileMulter = Array<
+  Express.Multer.File & { location: string; key: string; url: string }
+>
+
 type ArticlesLimits = 2 | 5 | 10 | 20 | 50
 
 type ArticlesDataProps = {
@@ -17,35 +21,34 @@ export default class ArticlesService {
   protected articlesRepository = ArticlesRepository
   protected categoryRepository = CategoryRepository
 
-  async createArticles({ file, articles }: any): Promise<StatusProps> {
-    const {
-      originalname: name,
-      fieldname,
-      size,
-      key,
-      location: url = '',
-    } = file
-
+  async createArticles({
+    file,
+    articles,
+  }: {
+    file: FileMulter
+    articles: Articles
+  }): Promise<StatusProps> {
     try {
-      if (fieldname) {
-        const articleWithImage = await prisma.images.create({
+      if (file.length > 0) {
+        const create_article = await prisma.articles.create({
           data: {
-            name,
-            url,
-            size,
-            key,
-            article: { create: { ...articles } },
+            ...articles,
+            images: {
+              create: file.map((img) => ({
+                name: img.originalname,
+                url: img.url || img.location,
+                size: img.size,
+                key: img.key,
+              })),
+            },
           },
-        })
-        const article = await this.articlesRepository.findUnique({
-          id: articleWithImage.articleId,
         })
 
         return {
           code: 201,
           status: true,
           message: 'Artigo criado com sucesso!',
-          data: { article, img: articleWithImage },
+          data: { ...create_article },
         }
       }
 
@@ -69,17 +72,25 @@ export default class ArticlesService {
   }
 
   async getArticles(data: ArticlesDataProps) {
-    const page = data.page || 1
-    const limit = +data.limit || this.limit
-    const offset = page * limit - limit
+    const page = +data.page || 1
+    const per_page = +data.limit || this.limit
+    const offset = page * per_page - per_page
 
     try {
-      const articles = await this.articlesRepository.findAll({
-        skip: offset,
-        take: limit,
-      })
+      const { data, count } = await this.articlesRepository.findAll(
+        {
+          skip: offset,
+          take: per_page,
+        },
+        {
+          author: { select: { name: true } },
+          images: {
+            select: { name: true, id: true, createdAt: true, size: true },
+          },
+        }
+      )
 
-      if (!articles.length)
+      if (!data.length)
         return {
           code: 404,
           status: false,
@@ -90,7 +101,13 @@ export default class ArticlesService {
         code: 200,
         status: true,
         message: '',
-        data: { articles, limit: this.limit, page, count: articles.length },
+        data: {
+          data,
+          limit: this.limit,
+          page,
+          count,
+          last_page: Math.ceil(count / per_page),
+        },
       }
     } catch (err) {
       return {
@@ -104,7 +121,10 @@ export default class ArticlesService {
   async getArticlesById(id: string) {
     try {
       const articles: Articles | Partial<Articles> =
-        await this.articlesRepository.findUnique({ id })
+        await this.articlesRepository.findUnique(
+          { id },
+          { include: { images: true, author: { select: { name: true } } } }
+        )
 
       if (!articles)
         return {
@@ -117,7 +137,7 @@ export default class ArticlesService {
         code: 200,
         status: true,
         message: '',
-        data: { ...articles, content: articles.content.toString() },
+        data: { ...articles },
       }
     } catch (err) {
       return {
@@ -178,7 +198,7 @@ export default class ArticlesService {
   }
 
   async getArticleByCategory(data: ArticlesDataProps) {
-    const page = data.page || 1
+    const page = +data.page || 1
     const limit = +data.limit || this.limit
     const offset = page * limit - limit
 
@@ -213,7 +233,7 @@ export default class ArticlesService {
         code: 200,
         status: true,
         message: '',
-        data: { articles, limit: this.limit, page, count: articles.length },
+        data: { articles, limit, page },
       }
     } catch (error) {
       return {
@@ -236,7 +256,7 @@ export default class ArticlesService {
           id: true,
           name: true,
           description: true,
-          imageUrl: true,
+          tub_img: true,
           author: { select: { name: true } },
         },
         { take: limit, skip: offset, orderBy: { id: 'desc' } }

@@ -3,16 +3,24 @@ import { Categories } from '@prisma/client'
 import { prisma } from '@database/index'
 
 export class ArticlesRepository {
-  async findUnique(where: any) {
-    return await prisma.articles.findUnique({ where: { ...where } })
+  async findUnique(where: any, options: any = {}) {
+    return await prisma.articles.findUnique({ where: { ...where }, ...options })
   }
 
   async create(data: any) {
     return await prisma.articles.create({ data })
   }
 
-  async findAll(options: any) {
-    return await prisma.articles.findMany({ where: {}, ...options })
+  async findAll(options: any, include: any = {}) {
+    const count = await prisma.articles.count()
+    const data = await prisma.articles.findMany({
+      where: {},
+      skip: options.skip,
+      take: options.take,
+      include: { ...include },
+    })
+
+    return { data, count }
   }
 
   async findMany(where: any = {}, select: any = {}, options: any = {}) {

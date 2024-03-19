@@ -37,7 +37,7 @@ export class Upload {
 
     const upload = multer({
       dest: path.resolve(__dirname, '..', 'temp', 'uploads'),
-      storage: storageTypes['s3'],
+      storage: storageTypes['local'],
       limits: {
         fileSize: 1024 * 1024 * 5,
       },

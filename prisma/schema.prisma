@@ -40,6 +40,7 @@ model Articles {
   id          String @id @default(auto()) @map("_id") @db.ObjectId
   name       String
   description     String
+  tub_img    String?
   images    Images[]
   content    String
   category    Categories @relation(fields: [categoryId], references: [id])
@@ -49,6 +50,20 @@ model Articles {
 
   @@map("articles")
   }
+
+  model Images {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  name String
+  url String?
+  size Int
+  key String
+  articleId String @db.ObjectId
+  article Articles @relation(fields: [articleId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@map("images")
+}
+
 
 
 model Stats {
@@ -61,16 +76,3 @@ model Stats {
   @@map("stats")
 }
 
-
-model Images {
-  id String @id @default(auto()) @map("_id") @db.ObjectId
-  name String
-  url String?
-  size Int
-  key String
-  articleId String @db.ObjectId
-  article Articles @relation(fields: [articleId], references: [id])
-  createdAt DateTime @default(now())
-
-  @@map("images")
-}
