@@ -3,6 +3,7 @@ import { StatusProps } from '@utils/apiReturn'
 
 import ArticlesRepository from '@repositories/articles.repository'
 import CategoryRepository from '@repositories/categories.repository'
+import { prisma } from '@database/index'
 
 type ArticlesLimits = 2 | 5 | 10 | 20 | 50
 
@@ -16,13 +17,39 @@ export default class ArticlesService {
   protected articlesRepository = ArticlesRepository
   protected categoryRepository = CategoryRepository
 
-  async createArticles(data: Partial<Articles>): Promise<StatusProps> {
+  async createArticles(dataArticle: any): Promise<StatusProps> {
+    const { image, ...data } = dataArticle
+    console.log('🚀 ~ ArticlesService ~ createArticles ~ image:', image)
+
     try {
-      await this.articlesRepository.create(data)
+      if (image.fieldname) {
+        const articleWithImage = await prisma.images.create({
+          data: {
+            name: image.originalname,
+            url: '',
+            size: image.size,
+            article: { create: { ...data } },
+          },
+        })
+        const article = await this.articlesRepository.findUnique({
+          id: articleWithImage.articleId,
+        })
+
+        return {
+          code: 201,
+          status: true,
+          message: 'Artigo criado com sucesso!',
+          data: { article, img: articleWithImage },
+        }
+      }
+
+      const article = await this.articlesRepository.create(data)
+
       return {
         code: 201,
         status: true,
         message: 'Artigo criado com sucesso!',
+        data: { ...article },
       }
     } catch (err) {
       console.log(err)

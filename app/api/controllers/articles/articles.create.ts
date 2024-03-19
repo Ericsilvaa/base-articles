@@ -10,6 +10,8 @@ export class ArticlesController {
 
   async createArticle(req: Request, res: Response) {
     const article = { ...req.body }
+    article.image = { ...req.file }
+
     const response = await this.articlesServices.createArticles(article)
 
     return res.status(response.code).json({ ...response })

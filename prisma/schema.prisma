@@ -40,7 +40,7 @@ model Articles {
   id          String @id @default(auto()) @map("_id") @db.ObjectId
   name       String
   description     String
-  imageUrl   String?
+  images    Images[]
   content    String
   category    Categories @relation(fields: [categoryId], references: [id])
     categoryId  String @db.ObjectId
@@ -50,6 +50,7 @@ model Articles {
   @@map("articles")
   }
 
+
 model Stats {
   id String @id @default(auto()) @map("_id") @db.ObjectId
   users Int @default(0) // Contador de usuários
@@ -57,6 +58,18 @@ model Stats {
   articles Int @default(0) // Contador de artigos
   createdAt DateTime @default(now()) // Data de criação do registro
 
-
   @@map("stats")
+}
+
+
+model Images {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  name String
+  url String?
+  size Int
+  articleId String @db.ObjectId
+  article Articles @relation(fields: [articleId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@map("images")
 }
