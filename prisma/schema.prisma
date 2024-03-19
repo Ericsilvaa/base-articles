@@ -67,6 +67,7 @@ model Images {
   name String
   url String?
   size Int
+  key String
   articleId String @db.ObjectId
   article Articles @relation(fields: [articleId], references: [id])
   createdAt DateTime @default(now())

@@ -9,10 +9,13 @@ export class ArticlesController {
   }
 
   async createArticle(req: Request, res: Response) {
-    const article = { ...req.body }
-    article.image = { ...req.file }
+    const articles = { ...req.body }
+    const file = { ...req.file }
 
-    const response = await this.articlesServices.createArticles(article)
+    const response = await this.articlesServices.createArticles({
+      file,
+      articles,
+    })
 
     return res.status(response.code).json({ ...response })
   }

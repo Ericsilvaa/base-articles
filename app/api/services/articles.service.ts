@@ -17,18 +17,24 @@ export default class ArticlesService {
   protected articlesRepository = ArticlesRepository
   protected categoryRepository = CategoryRepository
 
-  async createArticles(dataArticle: any): Promise<StatusProps> {
-    const { image, ...data } = dataArticle
-    console.log('🚀 ~ ArticlesService ~ createArticles ~ image:', image)
+  async createArticles({ file, articles }: any): Promise<StatusProps> {
+    const {
+      originalname: name,
+      fieldname,
+      size,
+      key,
+      location: url = '',
+    } = file
 
     try {
-      if (image.fieldname) {
+      if (fieldname) {
         const articleWithImage = await prisma.images.create({
           data: {
-            name: image.originalname,
-            url: '',
-            size: image.size,
-            article: { create: { ...data } },
+            name,
+            url,
+            size,
+            key,
+            article: { create: { ...articles } },
           },
         })
         const article = await this.articlesRepository.findUnique({
@@ -43,7 +49,7 @@ export default class ArticlesService {
         }
       }
 
-      const article = await this.articlesRepository.create(data)
+      const article = await this.articlesRepository.create(articles)
 
       return {
         code: 201,
