@@ -1,8 +1,9 @@
 import { Router } from 'express'
 import articlesController from '@controllers/articles/index'
+import { Upload } from '@config/multer'
 
 const router = Router()
-
+const up = Upload.uploadMulter()
 router.get(
   '/category/:category_id',
   articlesController.getArticlesByCategory.bind(articlesController)
@@ -17,9 +18,11 @@ router.put(
   articlesController.updateArticle.bind(articlesController)
 )
 
-router
-  .route('/')
-  .get(articlesController.getAllArticles.bind(articlesController))
-  .post(articlesController.createArticle.bind(articlesController))
+router.get('/', articlesController.getAllArticles.bind(articlesController))
+router.post(
+  '/',
+  up.single('articles_image'),
+  articlesController.createArticle.bind(articlesController)
+)
 
 export default router

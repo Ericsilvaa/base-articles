@@ -1,6 +1,10 @@
 import ArticlesService from '@services/articles.service'
 import { Request, Response } from 'express'
 
+type FileMulter = Array<
+  Express.Multer.File & { location: string; key: string; url: string }
+>
+
 export class ArticlesController {
   protected articlesServices: ArticlesService
 
@@ -9,8 +13,16 @@ export class ArticlesController {
   }
 
   async createArticle(req: Request, res: Response) {
-    const article = { ...req.body }
-    const response = await this.articlesServices.createArticles(article)
+    const articles = { ...req.body }
+    const file = [{ ...req.file }] as FileMulter
+
+    if (!file[0].url)
+      file[0].url = `http://localhost:3000/files/${file[0].filename}`
+
+    const response = await this.articlesServices.createArticles({
+      file,
+      articles,
+    })
 
     return res.status(response.code).json({ ...response })
   }
