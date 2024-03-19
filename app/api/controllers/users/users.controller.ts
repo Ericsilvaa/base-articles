@@ -1,6 +1,12 @@
 import UsersService from '@services/users.service'
 import { Request, Response } from 'express'
 
+type FileMulter = Express.Multer.File & {
+  location: string
+  key: string
+  url: string
+}
+
 export class UsersController {
   protected userServices: UsersService
 
@@ -32,16 +38,23 @@ export class UsersController {
     return res.status(response.code).json({ ...response })
   }
 
-  // async updateUser(req: Request, res: Response) {
-  //   const user = { ...req.body }
-  //   user.id = req.params.id
+  async updateUser(req: Request, res: Response) {
+    const user = { ...req.body }
+    user.id = req.params.id
 
-  // realizar validações aqui
-  // delete user.confirmPassword
+    const response = await this.userServices.updateUser(user)
 
-  // estou querendo atualizar um usuário
-  // const response = await this.userServices.(user)
+    return res.status(response.code).json({ ...response })
+  }
 
-  // return res.status(response.code).json({ ...response })
-  // }
+  async updateProfilePhoto(req: Request, res: Response) {
+    const { id } = req.params
+    const photo = req.file as unknown as FileMulter
+
+    if (!photo.url) photo.url = `http://localhost:3000/files/${photo.filename}`
+
+    const response = await this.userServices.updateProfilePhoto(id, photo)
+
+    return res.status(response.code).json({ ...response })
+  }
 }

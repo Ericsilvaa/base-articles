@@ -22,6 +22,7 @@ model Users {
   articles   Articles[]
   Categories Categories[]
   profile    Profile?
+  photo     Photo?
 
   @@map("users")
 }
@@ -117,5 +118,5 @@ type Photo {
   url       String?
   size      Int
   key       String
-  createdAt DateTime @default(now())
+  createdAt DateTime? @default(now())
 }
