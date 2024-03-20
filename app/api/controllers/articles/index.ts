@@ -1,5 +1,7 @@
-import { ArticlesController } from './articles.create'
+import { ArticlesServices } from '@services/articles.service'
+import { ArticlesController } from './articles.controller'
 
-const usersController = new ArticlesController()
+const articlesServices = new ArticlesServices()
+const articlesController = new ArticlesController(articlesServices)
 
-export default usersController
+export default articlesController

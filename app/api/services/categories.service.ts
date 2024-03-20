@@ -1,8 +1,8 @@
 import { Categories } from '@prisma/client'
-import CategoriesRepository from '@repositories/categories.repository'
 import { StatusProps } from '@utils/apiReturn'
+import CategoriesRepository from '@repositories/categories.repository'
 
-export default class CategoriesService {
+export class CategoriesService {
   private categoryRepository = CategoriesRepository
 
   async createCategory(data: Partial<Categories>): Promise<StatusProps> {

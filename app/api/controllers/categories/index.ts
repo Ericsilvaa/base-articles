@@ -1,5 +1,7 @@
-import { CategoriesController } from './categories.create'
+import { CategoriesService } from '@services/categories.service'
+import { CategoriesController } from './categories.controller'
 
-const categoriesController = new CategoriesController()
+const categorriesService = new CategoriesService()
+const categoriesController = new CategoriesController(categorriesService)
 
 export default categoriesController

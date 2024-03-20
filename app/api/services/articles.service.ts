@@ -16,7 +16,7 @@ type ArticlesDataProps = {
   page?: number
   limit?: ArticlesLimits
 }
-export default class ArticlesService {
+export class ArticlesServices {
   private limit = 2
   private articlesRepository = ArticlesRepository
   private categoryRepository = CategoryRepository
@@ -33,6 +33,7 @@ export default class ArticlesService {
         const create_article = await prisma.articles.create({
           data: {
             ...articles,
+            tub_img: file[0].url,
             images: {
               create: file.map((img) => ({
                 name: img.originalname,
@@ -85,16 +86,16 @@ export default class ArticlesService {
         {
           author: { select: { name: true } },
           images: {
-            select: { name: true, id: true, createdAt: true, size: true },
+            select: { name: true, id: true, key: true, size: true, url: true },
           },
         }
       )
 
       if (!data.length)
         return {
-          code: 404,
-          status: false,
-          message: 'Nenhuma categoria encontrada',
+          code: 200,
+          status: true,
+          message: 'Nenhum Artigo registrado',
         }
 
       return {
@@ -102,8 +103,8 @@ export default class ArticlesService {
         status: true,
         message: '',
         data: {
-          data,
-          limit: this.limit,
+          articles: data,
+          limit: per_page,
           page,
           count,
           last_page: Math.ceil(count / per_page),

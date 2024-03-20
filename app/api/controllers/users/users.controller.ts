@@ -1,4 +1,4 @@
-import UsersService from '@services/users.service'
+import { UsersServices } from '@services/users.service'
 import { Request, Response } from 'express'
 
 type FileMulter = Express.Multer.File & {
@@ -8,10 +8,10 @@ type FileMulter = Express.Multer.File & {
 }
 
 export class UsersController {
-  protected userServices: UsersService
+  protected userServices: UsersServices
 
-  constructor() {
-    this.userServices = new UsersService()
+  constructor(userServices: UsersServices) {
+    this.userServices = userServices
   }
 
   async createUser(req: Request, res: Response) {

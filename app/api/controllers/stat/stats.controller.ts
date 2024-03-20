@@ -1,11 +1,11 @@
-import { StatsService } from '@services/stat.service'
+import { StatsServices } from '@services/stat.service'
 import { Request, Response } from 'express'
 
 export class StatsController {
-  protected statsServices: StatsService
+  protected statsServices: StatsServices
 
-  constructor() {
-    this.statsServices = new StatsService()
+  constructor(statsServices: StatsServices) {
+    this.statsServices = statsServices
   }
 
   async createStat(req: Request, res: Response) {

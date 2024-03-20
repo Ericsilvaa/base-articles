@@ -94,8 +94,8 @@ model Images {
   url       String?
   size      Int
   key       String
-  article   Articles @relation(fields: [articleId], references: [id])
-  articleId String   @db.ObjectId
+  article   Articles? @relation(fields: [articleId], references: [id])
+  articleId String?   @db.ObjectId
   createdAt DateTime @default(now())
 
   @@map("images")

@@ -1,11 +1,11 @@
-import CategoryService from '@services/categories.service'
+import { CategoriesService } from '@services/categories.service'
 import { Request, Response } from 'express'
 
 export class CategoriesController {
-  protected categoryService: CategoryService
+  protected categoryService: CategoriesService
 
-  constructor() {
-    this.categoryService = new CategoryService()
+  constructor(categoryService: CategoriesService) {
+    this.categoryService = categoryService
   }
 
   async createCategory(req: Request, res: Response) {

@@ -1,5 +1,7 @@
-import { UsersController } from './users.create'
+import { UsersServices } from '@services/users.service'
+import { UsersController } from './users.controller'
 
-const usersController = new UsersController()
+const usersServices = new UsersServices()
+const usersController = new UsersController(usersServices)
 
 export default usersController

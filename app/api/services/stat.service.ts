@@ -1,13 +1,12 @@
 import StatsRepository from '@repositories/stat.repository'
 import { GenerateStatsSchedule } from '@utils/statsSchedule'
 
-export class StatsService {
+export class StatsServices {
   protected statsRepository = StatsRepository
 
   async createStat() {
     try {
-      const response = await GenerateStatsSchedule()
-      console.log('🚀 ~ StatsService ~ createStat ~ response:', response)
+      await GenerateStatsSchedule()
 
       return {
         code: 201,
@@ -29,7 +28,6 @@ export class StatsService {
         {},
         { orderBy: { createdAt: 'desc' } }
       )
-      console.log('🚀 ~ StatsService ~ getStats ~ Stats:', Stats[0])
       return {
         code: 200,
         status: true,

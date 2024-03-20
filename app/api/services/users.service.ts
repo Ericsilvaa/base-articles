@@ -20,7 +20,7 @@ export interface IUser {
   confirmPassword: string
 }
 
-export default class UsersService {
+export class UsersServices {
   protected userRepository = UsersRepository
 
   async createUser(data: IUser): Promise<StatusProps> {
