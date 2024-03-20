@@ -65,7 +65,6 @@ export class UsersServices {
         }
       }
 
-      console.log('🚀 ~ UsersServices ~ updateUser ~ newUser:', newUser)
       await this.userRepository.update({ id }, newUser)
 
       return {
