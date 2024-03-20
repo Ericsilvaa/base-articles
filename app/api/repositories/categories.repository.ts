@@ -3,19 +3,19 @@ import { prisma } from '@database/index'
 import { Categories } from '@prisma/client'
 
 class CategoriesRepository {
-  async findUnique(where: any) {
+  static async findUnique(where: any) {
     return await prisma.categories.findUnique({ where: { ...where } })
   }
 
-  async create(data: any) {
+  static async create(data: any) {
     return await prisma.categories.create({ data })
   }
 
-  async findAll() {
+  static async findAll() {
     return await prisma.categories.findMany({})
   }
 
-  async findMany(where: any = {}, select: any = {}, options: any = {}) {
+  static async findMany(where: any = {}, select: any = {}, options: any = {}) {
     return await prisma.categories.findMany({
       select: { ...select },
       ...options,
@@ -23,20 +23,20 @@ class CategoriesRepository {
     })
   }
 
-  async findManyWithWhere(where: any, options?: any) {
+  static async findManyWithWhere(where: any, options?: any) {
     return await prisma.categories.findMany({
       where: { ...where },
       ...options,
     })
   }
 
-  async update(where: any, data: Partial<Categories>) {
+  static async update(where: any, data: Partial<Categories>) {
     return await prisma.categories.update({ where: { ...where }, data })
   }
 
-  async delete(where: any) {
+  static async delete(where: any) {
     return await prisma.categories.delete({ where })
   }
 }
 
-export default new CategoriesRepository()
+export default CategoriesRepository

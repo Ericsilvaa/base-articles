@@ -17,9 +17,9 @@ type ArticlesDataProps = {
   limit?: ArticlesLimits
 }
 export default class ArticlesService {
-  protected limit = 2
-  protected articlesRepository = ArticlesRepository
-  protected categoryRepository = CategoryRepository
+  private limit = 2
+  private articlesRepository = ArticlesRepository
+  private categoryRepository = CategoryRepository
 
   async createArticles({
     file,

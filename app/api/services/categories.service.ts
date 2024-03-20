@@ -3,7 +3,7 @@ import CategoriesRepository from '@repositories/categories.repository'
 import { StatusProps } from '@utils/apiReturn'
 
 export default class CategoriesService {
-  protected categoryRepository = CategoriesRepository
+  private categoryRepository = CategoriesRepository
 
   async createCategory(data: Partial<Categories>): Promise<StatusProps> {
     try {
