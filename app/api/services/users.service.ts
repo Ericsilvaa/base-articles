@@ -6,6 +6,12 @@ import UsersRepository from '@repositories/users.repository'
 
 import { StatusProps } from '@utils/apiReturn'
 
+type FileMulter = Express.Multer.File & {
+  location: string
+  key: string
+  url: string
+}
+
 export interface IUser {
   id?: string
   name: string
@@ -14,7 +20,7 @@ export interface IUser {
   confirmPassword: string
 }
 
-export default class UsersService {
+export class UsersServices {
   protected userRepository = UsersRepository
 
   async createUser(data: IUser): Promise<StatusProps> {
@@ -96,6 +102,73 @@ export default class UsersService {
           ...payload,
           token,
         },
+      }
+    } catch (error) {
+      return {
+        code: error?.code || 500,
+        status: false,
+        message: error?.message || 'Internal server error',
+      }
+    }
+  }
+
+  async updateUser({ id, ...userData }: Users): Promise<StatusProps> {
+    try {
+      const user = await this.userRepository.findUnique({ id })
+
+      if (!user) {
+        return {
+          code: 404,
+          status: false,
+          message: 'Usuário não encontrado!',
+        }
+      }
+
+      await this.userRepository.update({ id }, userData)
+
+      return {
+        code: 200,
+        status: true,
+        message: 'Usuário atualizado com sucesso!',
+      }
+    } catch (error) {
+      return {
+        code: error?.code || 500,
+        status: false,
+        message: error?.message || 'Internal server error',
+      }
+    }
+  }
+
+  async updateProfilePhoto(
+    id: string,
+    photo: FileMulter
+  ): Promise<StatusProps> {
+    try {
+      const user = await this.userRepository.findUnique({ id })
+
+      if (!user) {
+        return {
+          code: 404,
+          status: false,
+          message: 'Usuário não encontrado!',
+        }
+      }
+
+      const newPhoto = {
+        name: photo.originalname,
+        url: photo.url || photo.location,
+        size: photo.size,
+        key: photo.key,
+        createdAt: new Date(),
+      }
+
+      await this.userRepository.update({ id }, { photo: newPhoto })
+
+      return {
+        code: 200,
+        status: true,
+        message: 'Foto atualizada com sucesso!',
       }
     } catch (error) {
       return {

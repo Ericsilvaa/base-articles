@@ -1,4 +1,4 @@
-import ArticlesService from '@services/articles.service'
+import { ArticlesServices } from '@services/articles.service'
 import { Request, Response } from 'express'
 
 type FileMulter = Array<
@@ -6,10 +6,10 @@ type FileMulter = Array<
 >
 
 export class ArticlesController {
-  protected articlesServices: ArticlesService
+  protected articlesServices: ArticlesServices
 
-  constructor() {
-    this.articlesServices = new ArticlesService()
+  constructor(articleService: ArticlesServices) {
+    this.articlesServices = articleService
   }
 
   async createArticle(req: Request, res: Response) {

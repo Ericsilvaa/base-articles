@@ -3,26 +3,26 @@ import { prisma } from '@database/index'
 import { Stats } from '@prisma/client'
 
 class StatsRepository {
-  async findUnique(where: any) {
+  static async findUnique(where: any) {
     return await prisma.stats.findUnique({ where: { ...where } })
   }
 
-  async create(data: any) {
+  static async create(data: any) {
     return await prisma.stats.create({ data })
   }
 
-  async findAll() {
+  static async findAll() {
     return await prisma.stats.findMany({})
   }
 
-  async findMany(where: any = {}, options: any = {}) {
+  static async findMany(where: any = {}, options: any = {}) {
     return await prisma.stats.findMany({
       where: { ...where },
       ...options,
     })
   }
 
-  async findManyWithWhere(where: any, options?: any) {
+  static async findManyWithWhere(where: any, options?: any) {
     return await prisma.stats.findMany({
       where: { ...where },
       ...options,
@@ -38,4 +38,4 @@ class StatsRepository {
   }
 }
 
-export default new StatsRepository()
+export default StatsRepository

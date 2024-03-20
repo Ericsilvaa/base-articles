@@ -22,6 +22,7 @@ model Users {
   articles   Articles[]
   Categories Categories[]
   profile    Profile?
+  photo     Photo?
 
   @@map("users")
 }
@@ -93,8 +94,8 @@ model Images {
   url       String?
   size      Int
   key       String
-  article   Articles @relation(fields: [articleId], references: [id])
-  articleId String   @db.ObjectId
+  article   Articles? @relation(fields: [articleId], references: [id])
+  articleId String?   @db.ObjectId
   createdAt DateTime @default(now())
 
   @@map("images")
@@ -117,5 +118,5 @@ type Photo {
   url       String?
   size      Int
   key       String
-  createdAt DateTime @default(now())
+  createdAt DateTime? @default(now())
 }
