@@ -14,26 +14,16 @@ export class UsersController {
     this.userServices = userServices
   }
 
-  async createUser(req: Request, res: Response) {
-    const user = { ...req.body }
-    // estou querendo criar um usuário
-    const response = await this.userServices.createUser(user)
-
-    return res.status(response.code).json({ ...response })
-  }
-
-  async singIn(req: Request, res: Response) {
-    const user = { ...req.body }
-
-    // estou querendo criar um usuário
-    const response = await this.userServices.singIn(user)
+  async getUserCurrent(req: Request, res: Response) {
+    const user = req.user
+    const response = await this.userServices.findUserById(user.id)
 
     return res.status(response.code).json({ ...response })
   }
 
   async updateUser(req: Request, res: Response) {
     const user = { ...req.body }
-    user.id = req.params.id
+    user.id = req.user.id
 
     const response = await this.userServices.updateUser(user)
 
@@ -41,7 +31,7 @@ export class UsersController {
   }
 
   async updateProfilePhoto(req: Request, res: Response) {
-    const { id } = req.params
+    const { id } = req.user
     const photo = req.file as unknown as FileMulter
 
     if (!photo.url) photo.url = `http://localhost:3000/files/${photo.filename}`

@@ -6,18 +6,10 @@ import UsersRepository from '@repositories/users.repository'
 
 import { StatusProps } from '@utils/apiReturn'
 
-export interface IUser {
-  id?: string
-  name: string
-  email: string
-  password: string
-  confirmPassword: string
-}
-
 export class AuthServices {
   protected userRepository = UsersRepository
 
-  async registerUser(data: IUser): Promise<StatusProps> {
+  async registerUser(data: Partial<Users>): Promise<StatusProps> {
     // se eu tiver um id no data, estou pegando pelos parametros, quero atualizar, se não, estou querendo criar
     try {
       const emailExists = await this.userRepository.findUnique({
@@ -83,6 +75,7 @@ export class AuthServices {
         // exp: now + 60 * 60 * 24,
         exp: now + 60 * 10,
       }
+
       const key = 'mysecret'
 
       const token = jwt.sign(payload, key)
