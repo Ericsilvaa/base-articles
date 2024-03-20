@@ -34,10 +34,6 @@ class UsersRepository {
   }
 
   static async update(where: any, data: Partial<Users>) {
-    console.log('🚀 ~ UsersRepository ~ update ~ where:', {
-      where: { ...where },
-      data,
-    })
     return await prisma.users.update({ where: { ...where }, data })
   }
 
