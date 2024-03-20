@@ -1,6 +1,7 @@
 import { Router } from 'express'
 
 import users from './users.routes'
+import auth from './auth.routes'
 import articles from './articles.routes'
 import categories from './categories.routes'
 import stats from './stats.routes'
@@ -12,6 +13,7 @@ router.get('/', (req, res) => {
 })
 
 router.use('/users', users)
+router.use('/auth', auth)
 router.use('/categories', categories)
 router.use('/articles', articles)
 router.use('/stats', stats)

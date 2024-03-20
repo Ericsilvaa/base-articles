@@ -24,13 +24,6 @@ export class UsersController {
 
   async singIn(req: Request, res: Response) {
     const user = { ...req.body }
-    if (!user.email || !user.password) {
-      return res.status(400).json({
-        code: 400,
-        status: false,
-        message: 'Email e senha são obrigatórios',
-      })
-    }
 
     // estou querendo criar um usuário
     const response = await this.userServices.singIn(user)
