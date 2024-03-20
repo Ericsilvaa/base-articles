@@ -6,7 +6,7 @@ class UsersRepository {
   static async findUnique(where: any) {
     return await prisma.users.findUnique({
       where: { ...where },
-      include: { Categories: true, profile: true, articles: true },
+      include: { Categories: true, articles: true },
     })
   }
 
@@ -34,6 +34,10 @@ class UsersRepository {
   }
 
   static async update(where: any, data: Partial<Users>) {
+    console.log('🚀 ~ UsersRepository ~ update ~ where:', {
+      where: { ...where },
+      data,
+    })
     return await prisma.users.update({ where: { ...where }, data })
   }
 

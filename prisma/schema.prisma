@@ -27,16 +27,6 @@ model Users {
   @@map("users")
 }
 
-model Profile {
-  id      String   @id @default(auto()) @map("_id") @db.ObjectId
-  bio     String?
-  user    Users    @relation(fields: [userId], references: [id])
-  userId  String   @unique @db.ObjectId
-  address Address?
-
-  @@map("profile")
-}
-
 model Categories {
   id       String       @id @default(auto()) @map("_id") @db.ObjectId
   name     String
@@ -106,6 +96,11 @@ enum Role {
   ADMIN
 }
 
+type Profile {
+  bio     String?
+  address Address?
+}
+
 type Address {
   country String
   street  String
@@ -118,5 +113,4 @@ type Photo {
   url       String?
   size      Int
   key       String
-  createdAt DateTime? @default(now())
 }
