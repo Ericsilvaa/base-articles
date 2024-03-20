@@ -23,6 +23,26 @@ export interface IUser {
 export class UsersServices {
   protected userRepository = UsersRepository
 
+  async findUserById(id: string): Promise<StatusProps> {
+    try {
+      const user = await this.userRepository.findUnique({ id })
+      Reflect.deleteProperty(user, 'password')
+
+      return {
+        code: 200,
+        status: true,
+        message: 'Usuário encontrado com sucesso!',
+        data: { ...user },
+      }
+    } catch (error) {
+      return {
+        code: error?.code || 500,
+        status: false,
+        message: error?.message || 'Internal server error',
+      }
+    }
+  }
+
   async createUser(data: IUser): Promise<StatusProps> {
     // se eu tiver um id no data, estou pegando pelos parametros, quero atualizar, se não, estou querendo criar
     try {

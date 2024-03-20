@@ -1,35 +1,41 @@
 import { prisma } from '@database/index'
 
 import passport from 'passport'
-import passportJwt from 'passport-jwt'
+import { Strategy, ExtractJwt } from 'passport-jwt'
+import bcrypt from 'bcrypt'
 
-const { Strategy, ExtractJwt } = passportJwt
-
-export default class AuthPassport {
-  public static authJwt() {
-    const params = {
+export default passport.use(
+  new Strategy(
+    {
       secretOrKey: 'mysecret',
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-    }
-
-    const fnStrategy = async (payload: any, done: any) => {
+    },
+    async (payload, done) => {
       try {
-        const user = await prisma.users.findUnique({
-          where: { email: payload.email },
+        if (!payload.user.email || !payload.user.password) {
+          return done(null, false, {
+            message: 'Email e senha são obrigatórios',
+          })
+        }
+
+        const user = await prisma.users.findFirst({
+          where: {
+            email: payload.user.email,
+          },
         })
 
-        return done(null, user ? { ...payload } : false)
+        if (!user) {
+          return done(null, false, { message: 'Usuário não encontrado' })
+        }
+
+        if (!bcrypt.compareSync(payload.user.password, user.password)) {
+          return done(null, false, { message: 'Senha inválida' })
+        }
+
+        return done(null, user)
       } catch (error) {
         return done(error, false)
       }
     }
-
-    const strategy = new Strategy(params, fnStrategy)
-
-    passport.use(strategy)
-
-    return {
-      authenticate: () => passport.authenticate('jwt', { session: false }),
-    }
-  }
-}
+  )
+)
