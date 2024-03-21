@@ -24,32 +24,45 @@ export class CategoriesController {
   }
 
   async getAllCategories(req: Request, res: Response) {
-    const response = await this.categoryService.getCategories()
+    const { id } = req.user
+
+    const response = await this.categoryService.getCategories(id)
 
     return res.status(response.code).json({ ...response })
   }
 
   async getCategoryTree(req: Request, res: Response) {
-    const response = await this.categoryService.getTreeCategories()
+    const { id } = req.user
+
+    const response = await this.categoryService.getTreeCategories(id)
 
     return res.status(response.code).json({ ...response })
   }
 
   async getCategoryById(req: Request, res: Response) {
-    const response = await this.categoryService.getCategoryById(req.params.id)
+    const category: { id: string; authorId: string } = {
+      id: req.params.id,
+      authorId: req.user.id,
+    }
+
+    const response = await this.categoryService.getCategoryById(category)
 
     return res.status(response.code).json({ ...response })
   }
 
   async deleteCategory(req: Request, res: Response) {
-    const response = await this.categoryService.removeCategory(req.params.id)
+    const category: { id: string; authorId: string } = {
+      id: req.params.id,
+      authorId: req.user.id,
+    }
+
+    const response = await this.categoryService.removeCategory(category)
 
     return res.status(response.code).json({ ...response })
   }
 
   async updateCategory(req: Request, res: Response) {
-    const category = { ...req.body }
-    category.id = req.params.id
+    const category = { ...req.body, authorId: req.user.id, id: req.params.id }
 
     const response = await this.categoryService.updateCategory(category)
 

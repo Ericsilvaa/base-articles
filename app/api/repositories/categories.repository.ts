@@ -3,23 +3,26 @@ import { prisma } from '@database/index'
 import { Categories } from '@prisma/client'
 
 class CategoriesRepository {
-  static async findUnique(where: any) {
-    return await prisma.categories.findUnique({ where: { ...where } })
+  static async findUnique(where: any, options: any = {}) {
+    return await prisma.categories.findUnique({
+      where: { ...where },
+      ...options,
+    })
   }
 
   static async create(data: any) {
     return await prisma.categories.create({ data })
   }
 
-  static async findAll() {
-    return await prisma.categories.findMany({})
+  static async findAll(where: any = {}) {
+    return await prisma.categories.findMany({ where: { ...where } })
   }
 
   static async findMany(where: any = {}, select: any = {}, options: any = {}) {
     return await prisma.categories.findMany({
-      select: { ...select },
-      ...options,
       where: { ...where },
+      ...options,
+      select: { ...select },
     })
   }
 

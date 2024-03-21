@@ -14,25 +14,6 @@ class UsersRepository {
     return await prisma.users.create({ data })
   }
 
-  static async findAll() {
-    return await prisma.users.findMany({})
-  }
-
-  static async findMany(where: any = {}, select: any = {}, options: any = {}) {
-    return await prisma.users.findMany({
-      select: { ...select },
-      ...options,
-      where: { ...where },
-    })
-  }
-
-  static async findManyWithWhere(where: any, options?: any) {
-    return await prisma.users.findMany({
-      where: { ...where },
-      ...options,
-    })
-  }
-
   static async update(where: any, data: Partial<Users>) {
     return await prisma.users.update({ where: { ...where }, data })
   }

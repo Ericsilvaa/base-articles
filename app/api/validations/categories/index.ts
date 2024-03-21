@@ -13,6 +13,7 @@ export const createCategoryValidation = (
       'string.max': 'O nome do Categoria deve ter no máximo 100 caracteres',
       'string.empty': 'O nome do Categoria não pode estar vazio',
     }),
+    parentId: Joi.string().allow(null, ''),
   })
 
   const { error } = schema.validate(req.body)

@@ -29,7 +29,6 @@ export const createArticleValidation = (
     }),
   })
 
-  console.log('🚀 ~ req.body):', req.body)
   const { error } = schema.validate(req.body)
 
   if (error) {

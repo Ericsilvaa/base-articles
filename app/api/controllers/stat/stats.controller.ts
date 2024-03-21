@@ -9,12 +9,16 @@ export class StatsController {
   }
 
   async createStat(req: Request, res: Response) {
-    const response = await this.statsServices.createStat()
+    const { id } = req.user
+
+    const response = await this.statsServices.createStat(id)
     return res.status(200).json({ ...response })
   }
 
   async getStats(req: Request, res: Response) {
-    const response = await this.statsServices.getStats()
+    const { id } = req.user
+
+    const response = await this.statsServices.getStats(id)
     return res.status(200).json({ ...response })
   }
 }
