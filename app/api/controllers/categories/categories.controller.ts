@@ -10,6 +10,7 @@ export class CategoriesController {
 
   async createCategory(req: Request, res: Response) {
     const category = { ...req.body }
+    category.authorId = req.user.id
 
     if (category.id) {
       return res.status(400).json({
