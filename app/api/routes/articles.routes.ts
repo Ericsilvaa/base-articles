@@ -1,6 +1,7 @@
 import { Router } from 'express'
-import articlesController from '@controllers/articles/index'
 import { Upload } from '@config/multer'
+import articlesController from '@controllers/articles/index'
+import { createArticleValidation } from '../validations/articles'
 
 const router = Router()
 const up = Upload.uploadMulter()
@@ -22,6 +23,7 @@ router.get('/', articlesController.getAllArticles.bind(articlesController))
 router.post(
   '/',
   up.single('articles_image'),
+  createArticleValidation,
   articlesController.createArticle.bind(articlesController)
 )
 
