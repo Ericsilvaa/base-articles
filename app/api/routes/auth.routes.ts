@@ -10,7 +10,7 @@ router.post(
   authController.registerUser.bind(authController)
 )
 router.post(
-  '/signIn',
+  '/signin',
   singInValidation,
   authController.singIn.bind(authController)
 )

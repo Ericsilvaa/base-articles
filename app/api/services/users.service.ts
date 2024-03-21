@@ -1,5 +1,4 @@
 import { Users } from '@prisma/client'
-import bcrypt from 'bcrypt'
 
 import UsersRepository from '@repositories/users.repository'
 
@@ -118,10 +117,5 @@ export class UsersServices {
         message: error?.message || 'Internal server error',
       }
     }
-  }
-
-  private encryptPassword(password: string) {
-    const salt = bcrypt.genSaltSync(10)
-    return bcrypt.hashSync(password, salt)
   }
 }

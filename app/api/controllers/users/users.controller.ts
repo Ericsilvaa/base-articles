@@ -32,7 +32,7 @@ export class UsersController {
 
   async updateProfilePhoto(req: Request, res: Response) {
     const { id } = req.user
-    const photo = req.file as unknown as FileMulter
+    const photo = req.file as FileMulter
 
     if (!photo.url) photo.url = `http://localhost:3000/files/${photo.filename}`
 
