@@ -4,9 +4,9 @@ import { GenerateStatsSchedule } from '@utils/statsSchedule'
 export class StatsServices {
   protected statsRepository = StatsRepository
 
-  async createStat() {
+  async createStat(authorId: string) {
     try {
-      await GenerateStatsSchedule()
+      await GenerateStatsSchedule(authorId)
 
       return {
         code: 201,
@@ -22,10 +22,10 @@ export class StatsServices {
     }
   }
 
-  async getStats() {
+  async getStats(authorId: string) {
     try {
       const Stats = await this.statsRepository.findMany(
-        {},
+        { authorId },
         { orderBy: { createdAt: 'desc' } }
       )
       return {

@@ -4,7 +4,6 @@ import schedule from 'node-schedule'
 
 export async function StatsSchedule() {
   schedule.scheduleJob('*/1 * * * *', async () => {
-    const usersCount = await prisma.users.count()
     const categoriesCount = await prisma.categories.count()
     const articlesCount = await prisma.articles.count()
 
@@ -13,48 +12,51 @@ export async function StatsSchedule() {
     })
 
     const newStats: Omit<Stats, 'id'> = {
-      users: usersCount,
+      authorId: '1',
       categories: categoriesCount,
       articles: articlesCount,
       createdAt: new Date(),
     }
 
-    const changedUsers = !lastStats || newStats.users !== lastStats.users
     const changedCategories =
       !lastStats || newStats.categories !== lastStats.categories
     const changedArticles =
       !lastStats || newStats.articles !== lastStats.articles
 
-    if (changedUsers || changedCategories || changedArticles) {
+    if (changedCategories || changedArticles) {
       await prisma.stats.create({ data: newStats })
     }
   })
 }
 
-export async function GenerateStatsSchedule() {
+export async function GenerateStatsSchedule(authorId: string) {
   try {
-    const usersCount = await prisma.users.count()
-    const categoriesCount = await prisma.categories.count()
-    const articlesCount = await prisma.articles.count()
+    const categoriesCount = await prisma.categories.count({
+      where: { authorId },
+    })
+
+    const articlesCount = await prisma.articles.count({
+      where: { authorId },
+    })
 
     const lastStats = await prisma.stats.findFirst({
+      where: { authorId },
       orderBy: { createdAt: 'desc' },
     })
 
     const newStats: Omit<Stats, 'id'> = {
-      users: usersCount,
+      authorId,
       categories: categoriesCount,
       articles: articlesCount,
       createdAt: new Date(),
     }
 
-    const changedUsers = !lastStats || newStats.users !== lastStats.users
     const changedCategories =
       !lastStats || newStats.categories !== lastStats.categories
     const changedArticles =
       !lastStats || newStats.articles !== lastStats.articles
 
-    if (changedUsers || changedCategories || changedArticles) {
+    if (changedCategories || changedArticles) {
       await prisma.stats.create({ data: newStats })
     }
   } catch (error) {

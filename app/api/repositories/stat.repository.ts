@@ -22,13 +22,6 @@ class StatsRepository {
     })
   }
 
-  static async findManyWithWhere(where: any, options?: any) {
-    return await prisma.stats.findMany({
-      where: { ...where },
-      ...options,
-    })
-  }
-
   async update(where: any, data: Partial<Stats>) {
     return await prisma.stats.update({ where: { ...where }, data })
   }

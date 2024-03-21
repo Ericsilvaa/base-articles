@@ -1,4 +1,4 @@
-import { Categories } from '@prisma/client'
+import { Articles, Categories } from '@prisma/client'
 import { StatusProps } from '@utils/apiReturn'
 import CategoriesRepository from '@repositories/categories.repository'
 
@@ -24,10 +24,15 @@ export class CategoriesService {
     }
   }
 
-  async updateCategory(data: Categories): Promise<StatusProps> {
+  async updateCategory({
+    id,
+    authorId,
+    ...data
+  }: Categories): Promise<StatusProps> {
     try {
       const category = await this.categoryRepository.findUnique({
-        id: data.id,
+        id,
+        authorId,
       })
 
       if (!category) {
@@ -38,11 +43,9 @@ export class CategoriesService {
         }
       }
 
-      const { id, ...dataUp } = data
+      if (!data.parentId) data.parentId = null
 
-      if (!dataUp.parentId) dataUp.parentId = null
-
-      await this.categoryRepository.update({ id }, { ...dataUp })
+      await this.categoryRepository.update({ id, authorId }, { ...data })
 
       return {
         code: 200,
@@ -58,11 +61,28 @@ export class CategoriesService {
     }
   }
 
-  async removeCategory(id: string): Promise<StatusProps> {
+  async removeCategory({
+    id,
+    authorId,
+  }: {
+    id: string
+    authorId: string
+  }): Promise<StatusProps> {
     try {
-      const category = await this.categoryRepository.findUnique({
-        id,
-      })
+      const category = (await this.categoryRepository.findUnique(
+        {
+          id,
+          authorId,
+        },
+        { include: { articles: true } }
+      )) as Categories & { articles: Articles[] }
+
+      if (!category)
+        return {
+          code: 404,
+          status: false,
+          message: 'Nenhuma categoria encontrada',
+        }
 
       if (category.parentId) {
         return {
@@ -72,15 +92,7 @@ export class CategoriesService {
         }
       }
 
-      const articles = await this.categoryRepository.findUnique({
-        articles: {
-          some: {
-            categoryId: id,
-          },
-        },
-      })
-
-      if (articles) {
+      if (category.articles.length > 0) {
         return {
           code: 404,
           status: false,
@@ -104,8 +116,11 @@ export class CategoriesService {
     }
   }
 
-  async getCategories() {
-    const categories = await this.categoryRepository.findAll()
+  async getCategories(authorId: string) {
+    const categories = await this.categoryRepository.findMany(
+      { authorId },
+      { id: true, name: true, parentId: true, children: true }
+    )
 
     if (!categories.length)
       return {
@@ -122,8 +137,19 @@ export class CategoriesService {
     }
   }
 
-  async getCategoryById(id: string) {
-    const category = await this.categoryRepository.findUnique({ id })
+  async getCategoryById({ id, authorId }: { id: string; authorId: string }) {
+    const category = await this.categoryRepository.findUnique(
+      { id, authorId },
+      {
+        select: {
+          id: true,
+          name: true,
+          parentId: true,
+          children: true,
+          articles: true,
+        },
+      }
+    )
 
     if (!category)
       return {
@@ -140,8 +166,8 @@ export class CategoriesService {
     }
   }
 
-  async getTreeCategories() {
-    const categories = await this.categoryRepository.findAll()
+  async getTreeCategories(authorId: string) {
+    const categories = await this.categoryRepository.findAll({ authorId })
 
     return {
       code: 200,

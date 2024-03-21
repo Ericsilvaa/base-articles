@@ -22,7 +22,8 @@ model Users {
   articles   Articles[]
   Categories Categories[]
   profile    Profile?
-  photo     Photo?
+  photo      Photo?
+  stats      Stats[]
 
   @@map("users")
 }
@@ -70,7 +71,8 @@ model Comment {
 
 model Stats {
   id         String   @id @default(auto()) @map("_id") @db.ObjectId
-  users      Int      @default(0) // Contador de usuários
+  author     Users    @relation(fields: [authorId], references: [id])
+  authorId   String   @unique @db.ObjectId
   categories Int      @default(0) // Contador de categorias
   articles   Int      @default(0) // Contador de artigos
   createdAt  DateTime @default(now()) // Data de criação do registro
@@ -79,14 +81,14 @@ model Stats {
 }
 
 model Images {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
   name      String
   url       String?
   size      Int
   key       String
   article   Articles? @relation(fields: [articleId], references: [id])
   articleId String?   @db.ObjectId
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
 
   @@map("images")
 }
@@ -109,8 +111,8 @@ type Address {
 }
 
 type Photo {
-  name      String
-  url       String?
-  size      Int
-  key       String
+  name String
+  url  String?
+  size Int
+  key  String
 }
