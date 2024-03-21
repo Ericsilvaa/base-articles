@@ -15,6 +15,7 @@ type ArticlesDataProps = {
   id?: string
   page?: number
   limit?: ArticlesLimits
+  authorId?: string
 }
 export class ArticlesServices {
   private limit = 2
@@ -78,7 +79,8 @@ export class ArticlesServices {
     const offset = page * per_page - per_page
 
     try {
-      const { data, count } = await this.articlesRepository.findAll(
+      const { dataArticle, count } = await this.articlesRepository.findAll(
+        { authorId: data.authorId },
         {
           skip: offset,
           take: per_page,
@@ -91,7 +93,7 @@ export class ArticlesServices {
         }
       )
 
-      if (!data.length)
+      if (!dataArticle.length)
         return {
           code: 200,
           status: true,
@@ -103,7 +105,7 @@ export class ArticlesServices {
         status: true,
         message: '',
         data: {
-          articles: data,
+          articles: dataArticle,
           limit: per_page,
           page,
           count,
@@ -119,11 +121,17 @@ export class ArticlesServices {
     }
   }
 
-  async getArticlesById(id: string) {
+  async getArticlesById({
+    id,
+    authorId,
+  }: {
+    id: string
+    authorId: string
+  }): Promise<StatusProps> {
     try {
       const articles: Articles | Partial<Articles> =
         await this.articlesRepository.findUnique(
-          { id },
+          { id, authorId },
           { include: { images: true, author: { select: { name: true } } } }
         )
 
@@ -149,9 +157,15 @@ export class ArticlesServices {
     }
   }
 
-  async removeArticles(id: string): Promise<StatusProps> {
+  async removeArticles({
+    id,
+    authorId,
+  }: {
+    id: string
+    authorId: string
+  }): Promise<StatusProps> {
     try {
-      await this.articlesRepository.delete({ id })
+      await this.articlesRepository.delete({ id, authorId })
 
       return {
         code: 200,
@@ -168,10 +182,10 @@ export class ArticlesServices {
   }
 
   async updateArticles(data: Partial<Articles>): Promise<StatusProps> {
-    const { id, ...content } = data
+    const { id, authorId, ...content } = data
 
     try {
-      const article = await this.articlesRepository.findUnique({ id })
+      const article = await this.articlesRepository.findUnique({ id, authorId })
 
       if (!article)
         return {
@@ -180,7 +194,7 @@ export class ArticlesServices {
           message: 'Artigo não encontrado',
         }
 
-      await this.articlesRepository.update({ id }, content)
+      await this.articlesRepository.update({ id, authorId }, content)
 
       return {
         code: 201,
@@ -204,7 +218,10 @@ export class ArticlesServices {
     const offset = page * limit - limit
 
     try {
-      const categories = await this.fetchCategoriesWithChildren(data.id)
+      const categories = await this.fetchCategoriesWithChildren({
+        id: data.id,
+        authorId: data.authorId,
+      })
 
       if (!Array.isArray(categories)) {
         return categories
@@ -218,7 +235,11 @@ export class ArticlesServices {
 
       const ids: string[] = categories.map((c) => c.id)
 
-      const articles = await this.fetchArticlesWithUsers(ids, offset, limit)
+      const articles = await this.fetchArticlesWithCategories(
+        ids,
+        offset,
+        limit
+      )
 
       if (!Array.isArray(articles)) {
         return articles
@@ -245,13 +266,13 @@ export class ArticlesServices {
     }
   }
 
-  private async fetchArticlesWithUsers(
+  private async fetchArticlesWithCategories(
     ids: string[],
     offset: number,
     limit: number
   ) {
     try {
-      const articlesWithUsers = await this.articlesRepository.findMany(
+      const articlesWith = await this.articlesRepository.findMany(
         { categoryId: { in: ids } },
         {
           id: true,
@@ -263,7 +284,7 @@ export class ArticlesServices {
         { take: limit, skip: offset, orderBy: { id: 'desc' } }
       )
 
-      return articlesWithUsers
+      return articlesWith
     } catch (error) {
       return {
         code: error?.code || 500,
@@ -273,10 +294,27 @@ export class ArticlesServices {
     }
   }
 
-  private async fetchCategoriesWithChildren(id: string) {
+  private async fetchCategoriesWithChildren({
+    id,
+    authorId,
+  }: {
+    id: string
+    authorId: string
+  }) {
     try {
       // Buscar a categoria principal pelo ID
-      const mainCategory = await this.categoryRepository.findUnique({ id })
+      const mainCategory = await this.categoryRepository.findUnique({
+        id,
+        authorId,
+      })
+
+      if (!mainCategory) {
+        return {
+          code: 404,
+          status: false,
+          message: 'Nenhuma categoria encontrada',
+        }
+      }
 
       // Buscar as subcategorias com base no ID da categoria principal
       const subcategories = await this.categoryRepository.findManyWithWhere({

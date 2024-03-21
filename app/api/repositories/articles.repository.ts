@@ -4,6 +4,10 @@ import { prisma } from '@database/index'
 
 export class ArticlesRepository {
   static async findUnique(where: any, options: any = {}) {
+    console.log('🚀 ~ ArticlesRepository ~ findUnique ~ where:', {
+      where: { ...where },
+      ...options,
+    })
     return await prisma.articles.findUnique({ where: { ...where }, ...options })
   }
 
@@ -11,16 +15,16 @@ export class ArticlesRepository {
     return await prisma.articles.create({ data })
   }
 
-  static async findAll(options: any, include: any = {}) {
+  static async findAll(where: any = {}, options: any, include: any = {}) {
     const count = await prisma.articles.count()
-    const data = await prisma.articles.findMany({
-      where: {},
+    const dataArticle = await prisma.articles.findMany({
+      where: { ...where },
       skip: options.skip,
       take: options.take,
       include: { ...include },
     })
 
-    return { data, count }
+    return { dataArticle, count }
   }
 
   static async findMany(where: any = {}, select: any = {}, options: any = {}) {

@@ -13,8 +13,7 @@ export class ArticlesController {
   }
 
   async createArticle(req: Request, res: Response) {
-    const articles = { ...req.body }
-    articles.authorId = req.user.id
+    const articles = { ...req.body, authorId: req.user.id }
 
     const file = [{ ...req.file }] as FileMulter
 
@@ -30,7 +29,7 @@ export class ArticlesController {
   }
 
   async getAllArticles(req: Request, res: Response) {
-    const query = req.query
+    const query = { ...req.query, authorId: req.user.id }
 
     const response = await this.articlesServices.getArticles(query)
 
@@ -38,20 +37,23 @@ export class ArticlesController {
   }
 
   async getArticlesById(req: Request, res: Response) {
-    const response = await this.articlesServices.getArticlesById(req.params.id)
+    const article = { id: req.params.id, authorId: req.user.id }
+
+    const response = await this.articlesServices.getArticlesById(article)
 
     return res.status(response.code).json({ ...response })
   }
 
   async deleteArticle(req: Request, res: Response) {
-    const response = await this.articlesServices.removeArticles(req.params.id)
+    const article = { id: req.params.id, authorId: req.user.id }
+
+    const response = await this.articlesServices.removeArticles(article)
 
     return res.status(response.code).json({ ...response })
   }
 
   async updateArticle(req: Request, res: Response) {
-    const article = { ...req.body }
-    article.id = req.params.id
+    const article = { ...req.body, id: req.params.id, authorId: req.user.id }
 
     const response = await this.articlesServices.updateArticles(article)
 
@@ -59,13 +61,13 @@ export class ArticlesController {
   }
 
   async getArticlesByCategory(req: Request, res: Response) {
-    const { category_id: id } = req.params
-    const query = req.query
+    const query = {
+      ...req.query,
+      authorId: req.user.id,
+      id: req.params.category_id,
+    }
 
-    const response = await this.articlesServices.getArticleByCategory({
-      id,
-      ...query,
-    })
+    const response = await this.articlesServices.getArticleByCategory(query)
 
     return res.status(response.code).json({ ...response })
   }
