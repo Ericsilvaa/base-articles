@@ -15,8 +15,8 @@ export class UsersController {
   }
 
   async getUserCurrent(req: Request, res: Response) {
-    const user = req.user
-    const response = await this.userServices.findUserById(user.id)
+    const { id } = req.user
+    const response = await this.userServices.findUserById(id)
 
     return res.status(response.code).json({ ...response })
   }

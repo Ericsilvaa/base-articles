@@ -1,5 +1,6 @@
 import { Router } from 'express'
 import categoriesController from '@controllers/categories/index'
+import { createCategoryValidation } from '../validations/categories'
 // import AuthPassport from '../middlewares/passport'
 
 const router = Router()
@@ -27,6 +28,9 @@ router.put(
 router
   .route('/')
   .get(categoriesController.getAllCategories.bind(categoriesController))
-  .post(categoriesController.createCategory.bind(categoriesController))
+  .post(
+    createCategoryValidation,
+    categoriesController.createCategory.bind(categoriesController)
+  )
 
 export default router

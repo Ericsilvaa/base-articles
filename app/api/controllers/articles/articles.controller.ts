@@ -14,6 +14,8 @@ export class ArticlesController {
 
   async createArticle(req: Request, res: Response) {
     const articles = { ...req.body }
+    articles.authorId = req.user.id
+
     const file = [{ ...req.file }] as FileMulter
 
     if (!file[0].url)
