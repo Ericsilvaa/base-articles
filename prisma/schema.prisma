@@ -42,12 +42,12 @@ model Categories {
 }
 
 model Articles {
-  id          String     @id @default(auto()) @map("_id") @db.ObjectId
+  id  String     @id @default(auto()) @map("_id") @db.ObjectId
   name        String
   description String
   tub_img     String?
   // images      Photo[]
-  images      Images[]
+  images  Images[]
   content     String
   category    Categories @relation(fields: [categoryId], references: [id])
   categoryId  String     @db.ObjectId

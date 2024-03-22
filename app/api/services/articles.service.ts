@@ -279,7 +279,12 @@ export class ArticlesServices {
           name: true,
           description: true,
           tub_img: true,
+          content: true,
+          categoryId: true,
           author: { select: { name: true } },
+          images: {
+            select: { name: true, id: true, key: true, size: true, url: true },
+          },
         },
         { take: limit, skip: offset, orderBy: { id: 'desc' } }
       )
