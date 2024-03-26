@@ -2,7 +2,7 @@ import { AuthServices } from '@services/auth.service'
 import { Request, Response } from 'express'
 
 export class AuthController {
-  protected authServices: AuthServices
+  private authServices: AuthServices
 
   constructor(authServices: AuthServices) {
     this.authServices = authServices

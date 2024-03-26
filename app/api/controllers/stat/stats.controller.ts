@@ -2,7 +2,7 @@ import { StatsServices } from '@services/stat.service'
 import { Request, Response } from 'express'
 
 export class StatsController {
-  protected statsServices: StatsServices
+  private statsServices: StatsServices
 
   constructor(statsServices: StatsServices) {
     this.statsServices = statsServices

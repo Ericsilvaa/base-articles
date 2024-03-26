@@ -1,9 +1,9 @@
+import { prisma } from '@database/index'
 import { Articles } from '@prisma/client'
 import { StatusProps } from '@utils/apiReturn'
 
-import ArticlesRepository from '@repositories/articles.repository'
-import CategoryRepository from '@repositories/categories.repository'
-import { prisma } from '@database/index'
+import { ArticlesRepository } from '@repositories/articles.repository'
+import { CategoriesRepository } from '@repositories/categories.repository'
 
 type FileMulter = Array<
   Express.Multer.File & { location: string; key: string; url: string }
@@ -19,8 +19,16 @@ type ArticlesDataProps = {
 }
 export class ArticlesServices {
   private limit = 2
-  private articlesRepository = ArticlesRepository
-  private categoryRepository = CategoryRepository
+  private articlesRepository: ArticlesRepository
+  private categoryRepository: CategoriesRepository
+
+  constructor(
+    articlesRepository: ArticlesRepository,
+    categoryRepository: CategoriesRepository
+  ) {
+    this.articlesRepository = articlesRepository
+    this.categoryRepository = categoryRepository
+  }
 
   async createArticles({
     file,

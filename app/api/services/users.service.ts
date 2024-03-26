@@ -1,6 +1,6 @@
 import { Users } from '@prisma/client'
 
-import UsersRepository from '@repositories/users.repository'
+import { UsersRepository } from '@repositories/users.repository'
 
 import { StatusProps } from '@utils/apiReturn'
 
@@ -11,7 +11,11 @@ type FileMulter = Express.Multer.File & {
 }
 
 export class UsersServices {
-  protected userRepository = UsersRepository
+  private userRepository: UsersRepository
+
+  constructor(userRepository: UsersRepository) {
+    this.userRepository = userRepository
+  }
 
   async findUserById(id: string): Promise<StatusProps> {
     try {

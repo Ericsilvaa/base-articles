@@ -20,8 +20,8 @@ export const AuthMiddleware = (
 
     req.user = {
       id: decodeJwt.id,
-      email: decodeJwt.email,
-      role: decodeJwt.role,
+      // email: decodeJwt.email,
+      // role: decodeJwt.role,
     }
 
     return next()

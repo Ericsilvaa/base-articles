@@ -8,7 +8,7 @@ type FileMulter = Express.Multer.File & {
 }
 
 export class UsersController {
-  protected userServices: UsersServices
+  private userServices: UsersServices
 
   constructor(userServices: UsersServices) {
     this.userServices = userServices

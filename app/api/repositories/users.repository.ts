@@ -3,18 +3,18 @@ import { prisma } from '@database/index'
 import { Users } from '@prisma/client'
 
 class UsersRepository {
-  static async findUnique(where: any) {
+  async findUnique(where: any) {
     return await prisma.users.findUnique({
       where: { ...where },
       include: { Categories: true, articles: true },
     })
   }
 
-  static async create(data: any) {
+  async create(data: any) {
     return await prisma.users.create({ data })
   }
 
-  static async update(where: any, data: Partial<Users>) {
+  async update(where: any, data: Partial<Users>) {
     return await prisma.users.update({ where: { ...where }, data })
   }
 
@@ -23,4 +23,4 @@ class UsersRepository {
   }
 }
 
-export default UsersRepository
+export { UsersRepository }

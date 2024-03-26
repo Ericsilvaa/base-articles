@@ -2,7 +2,7 @@ import { CategoriesService } from '@services/categories.service'
 import { Request, Response } from 'express'
 
 export class CategoriesController {
-  protected categoryService: CategoriesService
+  private categoryService: CategoriesService
 
   constructor(categoryService: CategoriesService) {
     this.categoryService = categoryService

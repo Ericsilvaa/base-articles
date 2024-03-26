@@ -1,9 +1,13 @@
 import { Articles, Categories } from '@prisma/client'
 import { StatusProps } from '@utils/apiReturn'
-import CategoriesRepository from '@repositories/categories.repository'
+import { CategoriesRepository } from '@repositories/categories.repository'
 
 export class CategoriesService {
-  private categoryRepository = CategoriesRepository
+  private categoryRepository: CategoriesRepository
+
+  constructor(categoryRepository: CategoriesRepository) {
+    this.categoryRepository = categoryRepository
+  }
 
   async createCategory(data: Partial<Categories>): Promise<StatusProps> {
     try {

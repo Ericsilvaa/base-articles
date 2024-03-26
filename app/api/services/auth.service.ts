@@ -2,12 +2,16 @@ import { Users } from '@prisma/client'
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 
-import UsersRepository from '@repositories/users.repository'
+import { UsersRepository } from '@repositories/users.repository'
 
 import { StatusProps } from '@utils/apiReturn'
 
 export class AuthServices {
-  protected userRepository = UsersRepository
+  private userRepository: UsersRepository
+
+  constructor(userRepository: UsersRepository) {
+    this.userRepository = userRepository
+  }
 
   async registerUser(data: Partial<Users>): Promise<StatusProps> {
     // se eu tiver um id no data, estou pegando pelos parametros, quero atualizar, se não, estou querendo criar

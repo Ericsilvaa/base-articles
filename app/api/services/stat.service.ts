@@ -1,8 +1,12 @@
-import StatsRepository from '@repositories/stat.repository'
+import { StatsRepository } from '@repositories/stat.repository'
 import { GenerateStatsSchedule } from '@utils/statsSchedule'
 
 export class StatsServices {
-  protected statsRepository = StatsRepository
+  private statsRepository: StatsRepository
+
+  constructor(statsRepository: StatsRepository) {
+    this.statsRepository = statsRepository
+  }
 
   async createStat(authorId: string) {
     try {

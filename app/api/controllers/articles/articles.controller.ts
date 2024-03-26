@@ -6,7 +6,7 @@ type FileMulter = Array<
 >
 
 export class ArticlesController {
-  protected articlesServices: ArticlesServices
+  private articlesServices: ArticlesServices
 
   constructor(articleService: ArticlesServices) {
     this.articlesServices = articleService
